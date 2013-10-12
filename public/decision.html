@@ -3,6 +3,9 @@
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script src="initfb.js"></script>
 <script>
+
+
+
 	// Update UI to prompt user to login
 	function promptLogin(request_message) {
 		$('#showButton').removeAttr('disabled');
@@ -26,8 +29,8 @@
 		var parameters = {
 			"access_token": fb_authResponse.accessToken,
 			"message": message,
-			"tags": friends.join(),
-			"place": place,
+			"with_tags" : "152339121642221"
+			//"event":"152339121642221"
 		};
 		$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
 			alert("Post result: " + data);
@@ -61,7 +64,27 @@
 		return true;
 	}
 
-	function searchStatusContainingPlaceName(n) {
+
+	function storeEvent(event) {
+		eventHash=localStorage.getObj('eventHash')
+		if (eventHash==null) {
+			eventHash={}
+			eventHash[event.id]=event
+		}
+		else {
+			eventHash[event.id]=event
+		}
+
+	}
+
+
+	function searchStatusContainingPlaceName(eventId) {
+		eventHash=localStorage.getObj('eventHash')
+
+		if (eventHash!=null)  {
+			return eventHash[eventId]
+		}
+
 		return {};
 	}
 
