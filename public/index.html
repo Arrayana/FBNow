@@ -1,108 +1,36 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Red-Yellow Detector</title>
-
-
-    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+<head>
+    <title>FB Now!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.1/jquery.mobile-1.2.1.min.css" />
+    <link rel="stylesheet" href="styles.css" />
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
-    <script src="redyellow_data.js"></script>
-    <script src="main.js"></script>
     <script src="uiJquery.js"></script>
     <script src="initfb.js"></script>
     <script src="fbnow-lib.js"></script>
     <script src="decision.js"></script>
+</head>
+<body>
 
-   
-
-    <style>
-   
-      .ui-li-inner{ 
-        white-space: normal !important; 
-       }
-      .multiline{
-         height: 50px;
-        vertical-align:middle !important;
-        white-space:normal !important; 
-
-      }
-
-
-      .ui-btn-inner{ 
-        white-space: normal !important; 
-      }
-    
-      .verybig {
-        font-size: 4em;
-      }
-
-    
-
-      .ui-footer {
-        position: absolute !important;
-        bottom: 0;
-        width: 100%;
-        height: 40px;
-      }
-
-
-      .ui-page, .ui-header{
-      /* background: url("https://www.google.com/images/srpr/logo11w.png");*/  /*#497bae;*/
-        background:rgb(204, 204, 204);
-
-        }
-      .ui-header{
-
-        height: 170px;
-
-      }
-      .now {
-        font-size: 4em;
-         position:relative;
-        right:-180px;
-        top:-80px;
-      }
-    </style>
-  </head>
-  <body>
+<div id="fb-root"></div>
 
 <div data-role="page">
+    <div data-role="header">
+        <img  height="168" width="317" src="http://loveletters2strangers.com/wp-content/uploads/2013/02/facebook-logo.png"  />
+        <span class="now">NOW!</span>
+    </div><!-- /header -->
+    <div data-role="content">
+        <ul data-role="listview">
+            <li  id="slideEvent"  data-icon="false" ><a onclick="postButtonClick('event')" id="messageEvent" class="multiline" href="#">Generating..</a></li>
+            <li id="slideWeather" data-icon="false"><a onclick="postButtonClick('weather')" id="messageWeather" class="multiline" href="#">Generating..</a></li>
+            <li id="slideLocation" data-icon="false"><a onclick="postButtonClick('location')" id="messageLocation" class="multiline" href="#">Generating..</a></li>
+            <li id="slideQuote" data-icon="false"><a onclick="postButtonClick('quote')" id="messageQuote" class="multiline" href="#">Generating..</a></li>
+        </ul>
+    </div><!-- /content -->
 
-  <div data-role="header">
-    <img  height="168" width="317" src="http://loveletters2strangers.com/wp-content/uploads/2013/02/facebook-logo.png"  />
-
-    <span class="now">NOW!</span>
-
-  </div><!-- /header -->
-  
-
-
-  <div data-role="content"> 
-   
-    <!--  <span id="fbName"></span>
-      <h2 id="message1" data-theme="b">I am at Facebook Hackathon with Devika, Knott and Lock!!</h2>
-      <div id="message2" data-theme="b">Feeling really excited!!..</div>
-      <div id="message3" data-theme="b">Half way </div>
-      <div id="message4" data-theme="b">asdsad</div>-->
-      
-
-      <ul data-role="listview">
-        <li  id="slideEvent"  data-icon="false" ><a onclick="postButtonClick('event')" id="messageEvent" class="multiline" href="#">Processing...</a></li>
-        <li id="slideWeather" data-icon="false"><a onclick="postButtonClick('weather')" id="messageWeather" class="multiline" href="#">Processing...</a></li>
-        <li id="slideLocation" data-icon="false"><a onclick="postButtonClick('location')" id="messageLocation" class="multiline" href="#">Processing...</a></li>
-        <li id="slideQuote" data-icon="false"><a onclick="postButtonClick('quote')" id="messageQuote" class="multiline" href="#">Processing...</a></li>
-      </ul>
-    <!--button id="postButton" onClick="postButtonClick('event')">Post!</button-->
-
-    <!--
-   Within 500 miled of my latitude and longitude. you can check type of place, etc using this API
-    https://api.foursquare.com/v2/venues/explore?ll=37.48,-122.14&radius=500&client_id=QX0V0DYO0VPVBZVCPCIMINXXLBSLJ23BNV04GSWTZ4GEUQFF&client_secret=TMWVIY0RTQCQXLITI3FNTAVM4FIWB2V1LAD3U2JHR021JHSJ&v=20131011
-    -->
-      <div id="fb-root"></div>
-      <!-- <div class="fb-like" data-send="true" data-width="450" data-show-faces="true"></div> -->
-
+    <!-- TEST
       <table width="100%">
         <tr>
           <td colspan="2" style="text-align:center">
@@ -138,24 +66,13 @@
             Ideally you see events list here.
             <button onclick="FBFetch()">Try it</button>
       </div>
+    TEST -->
 
+    <!-- <div data-role="footer" class="ui-bar"> -->
 
-  </div><!-- /content -->
-
-
-  <!-- <div data-role="footer" class="ui-bar"> -->
-
-  <!-- </div> -->
+    <!-- </div> -->
 
 </div><!-- /page -->
 
-
-
-
-<script>
-
-
-</script>
-
-  </body>
+</body>
 </html>
