@@ -2,15 +2,17 @@ var fb_me;
 var fb_authResponse; // .uid .accessToken
 var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events';
 
+// Call this when the page has loaded
 $(document).ready(function() {
-  console.log('ready!');
+  console.log('Initializing FB SDK. Requesting permissions: '+required_permissions);
+
   $.ajaxSetup({ cache: true });
   $.getScript('//connect.facebook.net/en_UK/all.js', function(){
     window.fbAsyncInit = function() {
       // init the FB JS SDK
       FB.init({
           appId      : '534972969913512',                        // App ID from the app dashboard
-          channelUrl : '//redyellowdetector.herokuapp.com/channel.html', // Channel file for x-domain comms
+          channelUrl : '//facebooknow.herokuapp.com/channel.html', // Channel file for x-domain comms
           status     : true,                                 // Check Facebook Login status
           xfbml      : true                                  // Look for social plugins on the page
         });
@@ -20,42 +22,33 @@ $(document).ready(function() {
       FB.Event.subscribe('auth.login', function(response) {
         // do something with response
         console.log("auth.login response changed. Probably the user has just logged in.");
-        // for (var key in response) {
-        //   console.log("auth.login: "+key+": "+response[key]);
-        // }
-        // for (var key in response.authResponse) {
-        //   console.log("authResponse: "+key+": "+response.authResponse[key]); 
-        // }
       });
 
+      // Check user's login status and granted permissions
       checkUser();
 
     };
   });
 });
 
-/***Location functions
-*/
+/* --- Location functions --- */
 function getLocation()
-  {
-var x=document.getElementById("demo");
+{
+  var x=document.getElementById("demo");
   if (navigator.geolocation)
-    {
-    navigator.geolocation.getCurrentPosition(showPosition);
-    }
-  else{x.innerHTML="Geolocation is not supported by this browser.";}
-  }
-function showPosition(position)
   {
-var x=document.getElementById("demo");
+    navigator.geolocation.getCurrentPosition(showPosition);
+  }
+  else{x.innerHTML="Geolocation is not supported by this browser.";}
+}
+function showPosition(position)
+{
+  var x=document.getElementById("demo");
   x.innerHTML="Latitude: " + position.coords.latitude +
   "<br>Longitude: " + position.coords.longitude;
-  }
-
-
+}
 
 /* ------------ Click handlers --------------- */
-
 
 function clickToLoginHandler() {
     $('#showButton').attr('disabled','disabled');
@@ -91,12 +84,13 @@ function checkUser() {
         for (var i=0; i<list.length; i++) {
           console.log("checking permission of "+list[i]);
           if (response.data[0][list[i]] === undefined) {
+            // At least one permission hasn't been granted yet!
             promptLogin("Click to grant us more required permissions");
             return;
           }
         }
 
-        // It will reach here if all permissions are granted.
+        // It will call this function if all permissions have been granted.
         promptStart();
       });
 
@@ -112,15 +106,17 @@ function checkUser() {
   });
 }
 
+// Update UI to prompt user to login
 function promptLogin(request_message) {
   $('#showButton').removeAttr('disabled');
   $('#showButton').html(request_message);
-  $('#showButton').off('click'); // remove previous handler
+  $('#showButton').off('click'); // remove previous click handler
   $('#showButton').click(clickToLoginHandler);
 }
 
+// Update UI to say it's ready to go!
 function promptStart() {
-  // Show name
+  // Sample call: Show name
   FB.api('/me?fields=name', function(response) {
     $('#fbName').html(response.name);
   });
@@ -189,9 +185,7 @@ function FBFetch() {
 }
 
 
-/* ------------- Main functions --------------- */
-
-
+/* ------- Main functions for Red-Yellow Detector ------- */
 
 function start() {
   $('#showButton').attr('disabled','disabled');
