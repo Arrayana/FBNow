@@ -1,6 +1,6 @@
 var fb_me;
 var fb_authResponse; // .uid .accessToken
-var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events';
+var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events,publish_stream';
 
 // Call this when the page has loaded
 $(document).ready(function() {
@@ -54,7 +54,7 @@ function checkUser() {
   FB.getLoginStatus(function(response) {
     if (response.status === 'connected') {
       // Logged in
-      fb_authResponse = response;
+      fb_authResponse = response.authResponse;
 
       // Check required permissions
       console.log("checking permissions..");

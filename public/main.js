@@ -71,7 +71,7 @@ function checkUser() {
   FB.getLoginStatus(function(response) {
     if (response.status === 'connected') {
       // Logged in
-      fb_authResponse = response;
+      fb_authResponse = response.authResponse;
 
       // Check required permissions
       console.log("checking permissions..");
