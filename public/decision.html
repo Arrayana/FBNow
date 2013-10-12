@@ -3,6 +3,14 @@
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="initfb.js"></script>
 	<script>
+	/**** Local storage ***/
+	Storage.prototype.setObj = function(key, obj) {
+    return this.setItem(key, JSON.stringify(obj))
+	}
+	Storage.prototype.getObj = function(key) {
+	    return JSON.parse(this.getItem(key))
+	}
+
 	/**** Locationing ****/
 
 	var _radInKM = 1.0;
@@ -162,7 +170,7 @@
 			eventHash[myEvent.id] = myEvent;
 		}
 		else {
-			eventHash[myEvent.id]=myEvent;
+			eventHash[myEvent.id] = myEvent;
 		}
 	}
 
@@ -243,7 +251,7 @@
 
 					// Yes. Am I close to that event's location?
 					if (isCloseToEachOther(currentLocation, myEvent.venue)) {
-						alert("I'm close to "+myEvent.name); return;
+						// alert("I'm close to "+myEvent.name); return;
 
 						// Yes. Have I posted a status about this event earlier?
 						var status = searchStatusContainingEvent(myEvent);
@@ -255,17 +263,32 @@
 							} else {
 								// More than 1 hour ago. Post the event progress!
 								var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-								showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
+								preparePostContent(
+									"I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent), // message
+									[], // friends (no friends to avoid disturbing them)
+									myEvent.venue.id, // place
+									myEvent // event
+									);
 								return;
 							}
 						} else {
 							// No status about the event yet. Post a status about this event!
-							showGeneratedMessage("I am at "+myEvent.name+"!");
+							preparePostContent(
+								"I am at "+myEvent.name+"!", // message
+								friendsInEvent, // tag every friend here!
+								myEvent.venue.id, // place
+								myEvent // event
+								);
 							return;
 						}
 					} else {
 						// I'm not close to that event. I must have missed it!
-						showGeneratedMessage("I missed "+myEvent.name+" T_T");
+						preparePostContent(
+							"I missed "+myEvent.name+" T_T", // message
+							[], // no friend
+							null, // no place
+							null // no event
+							);
 						return;
 					}
 				}
