@@ -1,4 +1,3 @@
-var abc = "hello";
 var fb_me;
 var fb_authResponse; // .uid .accessToken
 var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events';
@@ -58,14 +57,6 @@ function showPosition(position){
                                       'longitude': position.coords.longitude }
   
 }
-function getPosition(position)
-{
-   if (window.fbnow == null){
-      window.fbnow = {};
-   }
-    window.fbnow.abc = position.coords.latitude + "," + position.coords.longitude;
-}
-
 
 /* ------------ Click handlers --------------- */
 
@@ -146,90 +137,65 @@ function promptStart() {
   $("#showButton").click(clickToStartHandler);
 }
 
-function getWeather(){
-    //TODO: Remove this
-    if (window.fbnow == null){
-        window.fbnow = {};
-    } window.fbnow.abc = "37.48,-122.14";
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(getPosition);
-        //alert(window.fbnow.abc);
+function pad(number, length) {
+    var str = '' + number;
+    while (str.length < length) {
+        str = '0' + str;
     }
-    var temp_diff =0;
-    jQuery(document).ready(function($)  {
-        //geolookup/q/37.48,-122.14.json
-    $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/conditions/q/"+window.fbnow.abc+".json",
-        dataType : "jsonp", success : function(parsed_json)
-        {
-            var location = parsed_json['location']['city'];
-            var temp_f = parsed_json['current_observation']['temp_f'];
-            alert("Current temperature in " + location + " is: " + temp_f);
-            $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/"+window.fbnow.abc+".json",
-                dataType : "jsonp", success : function(parsed_json)
-                {
-                    var location = parsed_json['location']['city'];
-                    var avg_f = parsed_json['current_observation']['temp_f'];
-                    alert("Average temperature in " + location + " is: " + temp_f);
-                    temp_diff = temp_f - avg_f;
-                }
-            });
-
-        }
-
-    });
-
-
-
-
-    });
-    alert("good it is " + temp_diff) ;//If temp_diff > 2 too hot, <2  too cold...we can add conditions...
+    return str;
 }
 
 function FBFetch() {
     $('#events').html('Processing..');
 
-    FB.api('/me?fields=events,friends,statuses.limit(10)', function(response) {
+    FB.api('/me?fields=events,friends', function(response) {
         $('#events').html('');
 
         fb_response = response;
-        friendslist = response.friends;
 
         var current_events=0,all_events=0;
         var currentdate = new Date();
         var datetime = currentdate.getFullYear() + "-"
-            +(currentdate.getMonth()+1)+ "-"
-            + currentdate.getDate() + "T"
-            + currentdate.getHours() + ":"
-            + currentdate.getMinutes() + ":"
-            + currentdate.getSeconds() + -currentdate.getTimezoneOffset()/60 ;
+          + pad(currentdate.getMonth()+1,2) + "-"
+          + pad(currentdate.getDate(),2) + "T"
+          + pad(currentdate.getHours(),2) + ":"
+          + pad(currentdate.getMinutes(),2) + ":"
+          + pad(currentdate.getSeconds(),2) + "-"
+          + pad(currentdate.getTimezoneOffset()/60,2) + "00" ;
 
         // Likes
-        $('#events').append("I can only try to get event....");
-        $('#events').append("I can only try to get event....");
-        $('#events').append(response.events.data.length);
+        // $('#events').append(response.events.data.length);
+
+        var results = { "event": {}, "friends": [] };
 
         for (var i=0; i<response.events.data.length; i++) {
             $('#events').append("\n"+i);
             //When date and time are needed
             if(response.events.data[i].end_time) {
-                $('#events').append(response.events.data[i].end_time);
-                if(response.events.data[i].end_time>datetime && response.events.data[i].start_time <datetime)
-                {
+                // $('#events').append(response.events.data[i].end_time);
+                if (response.events.data[i].end_time > datetime && response.events.data[i].start_time < datetime) {
                     $('#events').append(response.events.data[i].name + " in progress\n");
                     $('#events').append(response.events.data[i].id + " in progress\n");
+                    // :: Event result ::
+                    results.event = response.events.data[i];
+
+                    // Search for people attending this event
                     FB.api('/'+response.events.data[i].id+"?fields=attending", function(responseinner) {
                         fb_responseinner = responseinner;
-                        //friendslist = response.friends;
-                        $('#events').append(" " + responseinner.attending.data.length + "attending the event with you\n");
+                        // $('#events').append(" " + responseinner.attending.data.length + "attending the event with you\n");
+
+                        // Search for your friends only
                         for (var j=0; j<responseinner.attending.data.length; j++) {
                             //Everyone attending = $('#events').append(responseinner.attending.data[j].id + " ");
-                            for(var k=0;k<response.friends.data.length;k++){
+                            for (var k=0;k<response.friends.data.length;k++) {
                                 if(response.friends.data[k].id == responseinner.attending.data[j].id){
-                                    $('#events').append(" " + responseinner.attending.data[j].name);
+                                    // $('#events').append(" " + responseinner.attending.data[j].name);
+                                    // :: Append friend to result ::
+                                    results.friends.push(response.friends.data[k]);
                                 }
                             }
                         }
-                    });
+                    }); // end event attendees callback
                 }
             }
             //If only the date is relevant, check that date is the same

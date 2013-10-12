@@ -1,6 +1,6 @@
 var fb_me;
 var fb_authResponse; // .uid .accessToken
-var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events,publish_stream';
+var required_permissions = 'read_stream,user_events,publish_stream,user_friends';
 
 // Call this when the page has loaded
 $(document).ready(function() {
