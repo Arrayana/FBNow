@@ -279,13 +279,15 @@ function searchStatusContainingEvent(myEvent) {
 
 /* ================= Random quote & news ==================== */
 function getRandomQuote(callback) {
-  $.ajax({
-    url: "http://api.theysaidso.com/qod.js?category=life", //http://www.iheartquotes.com/api/v1/random.json",
-    dataType: "jsonp",
-    success: function (parsed_json) {
-      callback(parsed_json['data']['contents']['quote']);
-    }
-  });
+    $.ajax({
+        url: 'http://api.forismatic.com/api/1.0/',
+        type: 'GET',
+        data: 'method=getQuote&lang=en&format=jsonp&jsonp=?', // or $('#myform').serializeArray()
+        dataType: 'jsonp',
+        format: 'json',
+        jsonp: 'jsonp',
+        success: function(parsed_json) { callback(parsed_json['quoteText']) }
+    });
 }
 
 function getRandomNews(callback) {
