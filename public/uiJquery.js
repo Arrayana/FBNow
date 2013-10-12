@@ -27,12 +27,31 @@ array[1]="xxxxxx"
 
 localStorage.setObj('arx',array);
 */
-	$( "#message1" ).on( "swipe", swipeHandler );
+	$( "#swipeEvent" ).on( "swipe", swipeHandler );
  
   // Callback function references the event target and adds the 'swipe' class to it
   function swipeHandler( event ){
-   alert("ssss")
    postButtonClick("event");
  }
+ })
 
+  $( "#slideWeather" ).on( "swipe", swipeHandler );
+ 
+  // Callback function references the event target and adds the 'swipe' class to it
+  function swipeHandler( event ){
+  postButtonClick('weather') }
+ })
+
+   $( "#slideLocation" ).on( "swipe", swipeHandler );
+ 
+  // Callback function references the event target and adds the 'swipe' class to it
+  function swipeHandler( event ){
+  postButtonClick('location') }
+ })
+
+    $( "#slideQuote" ).on( "swipe", swipeHandler );
+ 
+  // Callback function references the event target and adds the 'swipe' class to it
+  function swipeHandler( event ){
+  postButtonClick('quote') }
  })
