@@ -373,7 +373,7 @@
 
 
 					});
-                getRandomQuote(function (quoteResult) {
+                getRandomNews(function (quoteResult) {
                     if (quoteResult) {
                         // I'm closed to somewhere. So, have I posted about it recently?
                         preparePostContent(
@@ -406,3 +406,13 @@
             }
         });
     }
+
+    function getRandomNews(callback) {
+    $.ajax({ url : "http://api.espn.com/v1/now/popular?apikey=tpnk43zgq4uqrpage6fjhsn8", //http://www.iheartquotes.com/api/v1/random.json",
+        dataType : "jsonp", success : function(parsed_json)
+        {
+            callback(parsed_json['feed'][0]['headline']);
+        }
+    });
+}
+
