@@ -181,30 +181,45 @@ function generateStatusMessage() {
         /*** Weather ***/
 
         getTemperatureDiff(currentLocation, function (temperatureDiff) {
-          if (temperatureDiff > 10) {
-            // It's hotter than normal
-            preparePostContent("weather",
-              "OMG ..It's so hot in here!!", 
-              [], // friend
-              null, // place
-              null // event
-            );
+            // Random between temperature & quote
+            if(getRandomNumberBetween(0,1) == 1){
+                // Get quote
+                getRandomQuote(function(result) {
+                    preparePostContent("weather",
+                        result,
+                        [], // friend
+                        null, // place
+                        null // event
+                    );
+                });
+            }
+            else{
+                // Get weather
+              if (temperatureDiff > 10) {
+                // It's hotter than normal
+                preparePostContent("weather",
+                  "OMG ..It's so hot in here!!",
+                  [], // friend
+                  null, // place
+                  null // event
+                );
 
-          } else if (temperatureDiff < -10) {
-            // It's cooler than normal
-            preparePostContent("weather",
-              "Crazy weather, I'm freezing now!", 
-              [], // friend
-              null, // place
-              null // event
-            );
-          } else {
-            preparePostContent("weather", "bahhh boring weather.. same old!!", 
-            	[], // friend
-              null, // place
-              null // event
-            );
-          }
+              } else if (temperatureDiff < -10) {
+                // It's cooler than normal
+                preparePostContent("weather",
+                  "Crazy weather, I'm freezing now!",
+                  [], // friend
+                  null, // place
+                  null // event
+                );
+              } else {
+                preparePostContent("weather", "Boring weather.. same old!!",
+                    [], // friend
+                  null, // place
+                  null // event
+                );
+              }
+            }
         });
 
         /*** Point of interest ***/
