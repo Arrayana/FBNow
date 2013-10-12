@@ -134,10 +134,11 @@ function promptStart() {
 function FBFetch() {
     $('#events').html('Processing..');
 
-    FB.api('/me?fields=events,statuses.limit(10)', function(response) {
+    FB.api('/me?fields=events,friends,statuses.limit(10)', function(response) {
         $('#events').html('');
 
         fb_response = response;
+        friendslist = response.friends;
 
         var current_events=0,all_events=0;
         var currentdate = new Date();
@@ -161,6 +162,20 @@ function FBFetch() {
                 if(response.events.data[i].end_time>datetime && response.events.data[i].start_time <datetime)
                 {
                     $('#events').append(response.events.data[i].name + " in progress\n");
+                    $('#events').append(response.events.data[i].id + " in progress\n");
+                    FB.api('/'+response.events.data[i].id+"?fields=attending", function(responseinner) {
+                        fb_responseinner = responseinner;
+                        //friendslist = response.friends;
+                        $('#events').append(" " + responseinner.attending.data.length + "attending the event with you\n");
+                        for (var j=0; j<responseinner.attending.data.length; j++) {
+                            //Everyone attending = $('#events').append(responseinner.attending.data[j].id + " ");
+                            for(var k=0;k<response.friends.data.length;k++){
+                                if(response.friends.data[k].id == responseinner.attending.data[j].id){
+                                    $('#events').append(" " + responseinner.attending.data[j].name);
+                                }
+                            }
+                        }
+                    });
                 }
             }
             //If only the date is relevant, check that date is the same
