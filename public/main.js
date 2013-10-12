@@ -145,6 +145,23 @@ function pad(number, length) {
     return str;
 }
 
+function getRandomQuote(){
+
+    //http://www.iheartquotes.com/api/v1/random.json
+    jQuery(document).ready(function($)  {
+        //geolookup/q/37.48,-122.14.json
+        $.ajax({ url : "http://api.theysaidso.com/qod.js?category=life", //http://www.iheartquotes.com/api/v1/random.json",
+            dataType : "jsonp", success : function(parsed_json)
+            {
+                $('#quote').append(parsed_json['data']);
+                alert(parsed_json['data']['contents']['quote']);
+            }
+
+        });
+
+    });
+}
+
 function FBFetch() {
     $('#events').html('Processing..');
 
