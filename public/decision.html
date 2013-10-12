@@ -2,6 +2,7 @@
 <head><title>Decision tree</title>
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="initfb.js"></script>
+	<script src="fbnow-lib.js"></script>
 	<script>
 	/**** Local storage ***/
 	Storage.prototype.setObj = function(key, obj) {
@@ -216,10 +217,6 @@
 		return 65;
 	}
 
-	function getClosestPointOfInterest(p) {
-		return { "name": "Fuki Sushi" };
-	}
-
 	function getMessageTimeSpentPercent(timeSpentPercent) {
 		if (timeSpentPercent<10)
 			return "Feeling excited!!.. just started"
@@ -242,15 +239,15 @@
 				// Is there a happenning event that I'm suppose to be attending now?
 				// Results will be { "event": {..}, "friends": [..] }
 				var eventAndFriends = getAttendingEventAndFriends(response);
+				eventAndFriends.event = undefined; /*TEST*/
 				if (eventAndFriends.event != undefined) {
 					var myEvent = eventAndFriends.event;
 					var friendsInEvent = eventAndFriends.friends;
-					// alert(myEvent.name + " and "+ friendsInEvent.join()); return;
-					// postFBStatus("Yo! "+results.event.name, results.friends, 166793820034304);
-					// return;
 
 					// Yes. Am I close to that event's location?
-					if (isCloseToEachOther(currentLocation, myEvent.venue)) {
+					var isCloseToEvent = isCloseToEachOther(currentLocation, myEvent.venue);
+					// var isCloseToEvent = false; /*TEST*/
+					if (isCloseToEvent) {
 						// alert("I'm close to "+myEvent.name); return;
 
 						// Yes. Have I posted a status about this event earlier?
@@ -300,31 +297,55 @@
 					// ** do nothing **
 				} else {
 					// I'm not at home. Check the weather
-					var averageDegree = getNormalTemperatureNow(getLocation());
-					var currentDegree = getCurrentTemperatureNow(getLocation());
+					var averageDegree = getNormalTemperatureNow(currentLocation);
+					var currentDegree = getCurrentTemperatureNow(currentLocation);
 					if (currentDegree - averageDegree > 10) {
 						// It's hotter than normal
-						showGeneratedMessage("OMG ..It's so hot in here!!");
+						preparePostContent(
+							"OMG ..It's so hot in here!!", // message
+							[], // friend
+							null, // place
+							null // event
+							);
+						return;
+
 					} else if (currentDegree - averageDegree < -10) {
 						// It's cooler than normal
-						showGeneratedMessage("Crazy weather, I am freezing now!!");
+						preparePostContent(
+							"Crazy weather, I am freezing now!!", // message
+							[], // friend
+							null, // place
+							null // event
+							);
+						return;
+
 					} else {
 						// Temperature is normal. Am I close to any point of interest? Find one.
-						var pointOfInterest = getClosestPointOfInterest(getLocation());
-						if (pointOfInterest) {
-							// I'm closed to somewhere. So, have I posted about it recently?
-							var status = searchStatusContainingPointOfInterest(pointOfInterest.name);
-							if (isLessThan5HourAgo(status)) {
-								// No use case for this.
-								// ** do nothing **
-							} else {
-								// Check in here!
-								preparePostContent("I'm here! "+pointOfInterest.name);
+						getClosestPointOfInterest(currentLocation, function(pointOfInterest){
+							if (pointOfInterest) {
+								// I'm closed to somewhere. So, have I posted about it recently?
+								searchStatusContainingPointOfInterest(pointOfInterest, function(status){
+									if (isLessThan5HourAgo(status)) {
+										// No use case for this.
+										// ** do nothing **
+									} else {
+										// Check in here!
+										preparePostContent(
+											"I'm here! "+pointOfInterest.name, // message
+											[], // friend
+											pointOfInterest.id, // place
+											null // event
+											);
+										return;
+
+									}	
+								});
+								
 							}
-						}
+						}); // end getClosestPointOfInterest
+						
 					}
 				}
-
 
 			}); // end callback of getCurrentLocation()
 
@@ -333,7 +354,7 @@
 	}
 
 	function postButtonClick() {
-		postFBStatus(prepared_message, text, prepared_place, prepared_event);
+		postFBStatus(prepared_message, prepared_friends, prepared_place, prepared_event);
 	}
 
 </script>
@@ -345,9 +366,8 @@
 	<span id="fbName"></span>
 
 	<p>
-		Generated status message:<br>
-		<div id="message" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="postButtonClick()">Post!</button>
+		<div id="message" style="font-size:3em;background-color:#ccffaa">Generating status message..</div><br>
+		<button id="postButton" onClick="postButtonClick()" disabled>Post!</button>
 	</p>
 </body>
 </html>

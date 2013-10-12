@@ -33,7 +33,8 @@ function isClosedToLocation(location1, location2){
 };
 
 
-// @location: {latitude: xxx, longitude: yyy}
+// @return
+//  Object {category: "Local business", category_list: Array[1], location: Object, name: "Fuki Sushi at Facebook", id: "175517295918833"}
 function getClosestPointOfInterest(currentLocation, callback){
   var searchString = 'search?type=place&distance=1000&center=' + 
                       currentLocation.latitude.toFixed(8) + 
@@ -49,7 +50,8 @@ function getClosestPointOfInterest(currentLocation, callback){
   });
 };
 
-// Place is {category: "Local business", category_list: Array[1], location: Object, name: "Fuki Sushi at Facebook", id: "175517295918833"}
+// @Place is {category: "Local business", category_list: Array[1], location: Object, name: "Fuki Sushi at Facebook", id: "175517295918833"}
+// @return Object {place: Object, message: "s/sleep/hack/g ↵what am I doing here?", id: "10151987481300955", updated_time: "2013-10-12T07:40:01+0000"}
 function searchStatusContainingPlace(place, callback){
   var searchString = 'me?fields=id,name,statuses.fields(place,message)';
   FB.api(searchString, function(response) {
@@ -66,6 +68,12 @@ function searchStatusContainingPlace(place, callback){
     callback(foundStatus);
   });
 };
+
+// @pointOfInterest
+// Object {category: "Local business", category_list: Array[1], location: Object, name: "Fuki Sushi at Facebook", id: "175517295918833"}
+function searchStatusContainingPointOfInterest(pointOfInterest, callback){
+  searchStatusContainingPlace(pointOfInterest, callback);
+}
 
 // placename is a string
 // function searchStatusContainingPlaceName(placeName, statuses, currentLocation){
