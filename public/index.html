@@ -33,11 +33,7 @@
         font-size: 4em;
       }
 
-      .now {
-        position:relative;
-        left:100px;
-        top:-70px;
-      }
+    
 
       .ui-footer {
         position: absolute !important;
@@ -52,6 +48,13 @@
         background:rgb(204, 204, 204);
 
         }
+
+      .now {
+        font-size: 4em;
+         position:relative;
+        right:-200px;
+        top:-80px;
+      }
     </style>
   </head>
   <body>
@@ -62,7 +65,7 @@
   <div data-role="header">
     <img  height="168" width="317" src="http://loveletters2strangers.com/wp-content/uploads/2013/02/facebook-logo.png"  />
 
-    <img  class="now" height="50%" width="50%"  src="http://www.raisingmiro.com/wp-content/uploads/2013/01/now.jpg  "  />
+    <span class="now">NOW!</span>
 
   </div><!-- /header -->
   
@@ -80,7 +83,7 @@
       
 
       <ul data-role="listview">
-        <li data-icon="false" ><a  class="multiline" href="acura.html">I am at Facebook Hackathon with Devika, Knott and Lock!!</a></li>
+        <li id="message1" data-icon="false" ><a  class="multiline" href="acura.html">I am at Facebook Hackathon with Devika, Knott and Lock!!</a></li>
         <li data-icon="false"><a href="audi.html">Feeling really excited!!.</a></li>
         <li data-icon="false"><a href="bmw.html">Half way</a></li>
         <li data-icon="false"><a href="bmw.html">asdsad</a></li>
