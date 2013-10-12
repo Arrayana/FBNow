@@ -1,6 +1,6 @@
 var fb_me;
 var fb_authResponse; // .uid .accessToken
-var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream';
+var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events';
 
 $(document).ready(function() {
   console.log('ready!');
@@ -131,7 +131,52 @@ function promptStart() {
   $("#showButton").click(clickToStartHandler);
 }
 
+function FBFetch() {
+    $('#events').html('Processing..');
+
+    FB.api('/me?fields=events,statuses.limit(10)', function(response) {
+        $('#events').html('');
+
+        fb_response = response;
+
+        var current_events=0,all_events=0;
+        var currentdate = new Date();
+        var datetime = currentdate.getFullYear() + "-"
+            +(currentdate.getMonth()+1)+ "-"
+            + currentdate.getDate() + "T"
+            + currentdate.getHours() + ":"
+            + currentdate.getMinutes() + ":"
+            + currentdate.getSeconds() + -currentdate.getTimezoneOffset()/60 ;
+
+        // Likes
+        $('#events').append("I can only try to get event....");
+        $('#events').append("I can only try to get event....");
+        $('#events').append(response.events.data.length);
+
+        for (var i=0; i<response.events.data.length; i++) {
+            $('#events').append("\n"+i);
+            //When date and time are needed
+            if(response.events.data[i].end_time) {
+                $('#events').append(response.events.data[i].end_time);
+                if(response.events.data[i].end_time>datetime && response.events.data[i].start_time <datetime)
+                {
+                    $('#events').append(response.events.data[i].name + " in progress\n");
+                }
+            }
+            //If only the date is relevant, check that date is the same
+            else if(datetime.indexOf(response.events.data[i].start_time)!=-1 ) {
+                $('#events').append(response.events.data[i].name + " in progress\n");
+            }
+        }
+
+
+    });
+}
+
+
 /* ------------- Main functions --------------- */
+
+
 
 function start() {
   $('#showButton').attr('disabled','disabled');
