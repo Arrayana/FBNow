@@ -88,8 +88,18 @@
 		return {};
 	}
 
-	function isLessThan1HourAgo(s) {
-		return false;
+	function isLessThan1HourAgo(event) {
+
+		startTime=new Date(event.start_time)
+		nowTime=new Date()
+		difference=(nowTime-startTime)
+		if (difference!=0)
+			difference=difference/1000
+
+		if (difference<3600)
+			return true
+		else
+			return false
 	}
 
 	function isLessThan5HourAgo(s) {
