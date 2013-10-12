@@ -36,21 +36,32 @@ $(document).ready(function() {
 
 /***Location functions
 */
-function getLocation()
-  {
-var x=document.getElementById("demo");
-  if (navigator.geolocation)
-    {
+function getLocation(){
+  var x=document.getElementById("demo");
+  if (navigator.geolocation){
+    // Async function, no return via return
     navigator.geolocation.getCurrentPosition(showPosition);
-    }
-  else{x.innerHTML="Geolocation is not supported by this browser.";}
   }
-function showPosition(position)
-  {
-var x=document.getElementById("demo");
+  else{
+    x.innerHTML="Geolocation is not supported by this browser.";
+  }
+}
+
+function showPosition(position){
+  var x=document.getElementById("demo");
   x.innerHTML="Latitude: " + position.coords.latitude +
   "<br>Longitude: " + position.coords.longitude;
+
+  // Set global location
+  if (window.fbnow == null){
+    // Create a new object
+    window.fbnow = {};
   }
+  
+  window.fbnow['current_location'] = {'latitude': position.coords.latitude, 
+                                      'longitude': position.coords.longitude }
+  
+}
 
 
 
@@ -137,7 +148,32 @@ function start() {
   $('#showButton').attr('disabled','disabled');
   $('#results').html('Processing..');
 
-  FB.api('/me?fields=likes,subscribedto', function(response) {
+  FB.api('/me?fields=likes,subscribedto,feed', function(response) {
+
+    var eventList = [
+      {
+        "name": "Lekkiko & Monkeyz wedding party!!", 
+        "location": "Veravian Resort", 
+        "id": "548939438509329", 
+        "start_time": "2013-11-09T17:00:00+0700"
+      }, 
+      {
+        "name": "Pao's Farewell Party", 
+        "location": "New Krung Thai Restaurant", 
+        "id": "555355841184544", 
+        "start_time": "2013-10-11T19:30:00-0700"
+      }, 
+      {
+        "name": "Facebook NorCal Regional Hackathon", 
+        "location": "Facebook HQ", 
+        "id": "152339121642221", 
+        "start_time": "2013-10-11T17:00:00-0700"
+      }
+    ];
+
+    console.log(isCloseToTheEvent(window.fbnow.current_location, eventList));
+
+
     $('#results').html('');
 
     fb_response = response;
