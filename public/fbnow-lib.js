@@ -313,7 +313,7 @@ function getRandomNews(callback) {
     dataType: "jsonp",
     success: function (parsed_json) {
       try {
-        var randomOrder = getRandomNumberBetween(0,10);
+        var randomOrder = getRandomNumberBetween(0,9);
         callback(parsed_json['feed'][randomOrder]['headline']);
       } catch (err) {
         console.log("Error getting news: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
