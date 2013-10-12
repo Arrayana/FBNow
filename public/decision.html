@@ -3,7 +3,7 @@
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script src="initfb.js"></script>
 <script>
-
+	var prepared_message,prepared_friends,prepared_place,prepared_event;
 
 
 	// Update UI to prompt user to login
@@ -25,15 +25,20 @@
 	}
 
 	// Post Facebook status
-	function postFBStatus(message, friends, place) {
+	function postFBStatus(message, friends, place, event) {
 		var parameters = {
 			"access_token": fb_authResponse.accessToken,
 			"message": message,
-			"with_tags" : "152339121642221"
-			//"event":"152339121642221"
+			"friends": friends.join(),
 		};
+		if (place) {
+			parameters.place = place;
+		}
+		if (event) {
+			storeEvent(event);
+		}
 		$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
-			alert("Post result: " + data);
+			alert("Posted!!");
 		});
 	}
 
@@ -51,8 +56,14 @@
 		return {};
 	}
 
-	function showGeneratedMessage(message) {
+	function preparePostContent(message, friends, place, event) {
+		prepared_message = message;
+		prepared_friends = friends;
+		prepared_place = place;
+		prepared_event = event;
+
 		$("#message").html(message);
+		// $("#friends..")
 		$("#postButton").removeAttr("disabled");
 	}
 
@@ -79,27 +90,27 @@
 
 
 	function searchStatusContainingPlaceName(eventId) {
-		eventHash=localStorage.getObj('eventHash')
+		eventHash=localStorage.getObj('eventHash');
 
 		if (eventHash!=null)  {
-			return eventHash[eventId]
+			return eventHash[eventId];
 		}
 
-		return {};
+		return null;
 	}
 
 	function isLessThan1HourAgo(event) {
 
-		startTime=new Date(event.start_time)
-		nowTime=new Date()
+		startTime=new Date(event.start_time);
+		nowTime=new Date();
 		difference=(nowTime-startTime)
 		if (difference!=0)
-			difference=difference/1000
+			difference=difference/1000;
 
 		if (difference<3600)
-			return true
+			return true;
 		else
-			return false
+			return false;
 	}
 
 	function isLessThan5HourAgo(s) {
@@ -151,17 +162,17 @@
 						} else {
 							// More than 1 hour ago. Post the event progress!
 							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-							showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
+							preparePostContent("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
 							return;
 						}
 					} else {
 						// No status about the event yet. Post a status about this event!
-						showGeneratedMessage("I am at "+myEvent.name+"!");
+						preparePostContent("I am at "+myEvent.name+"!");
 						return;
 					}
 				} else {
 					// I'm not close to that event. I must have missed it!
-					showGeneratedMessage("I missed "+myEvent.name+" T_T");
+					preparePostContent("I missed "+myEvent.name+" T_T");
 					return;
 				}
 			}
@@ -177,10 +188,10 @@
 				var currentDegree = getCurrentTemperatureNow(getLocation());
 				if (currentDegree - averageDegree > 10) {
 					// It's hotter than normal
-					showGeneratedMessage("OMG ..It's so hot in here!!");
+					preparePostContent("OMG ..It's so hot in here!!");
 				} else if (currentDegree - averageDegree < -10) {
 					// It's cooler than normal
-					showGeneratedMessage("Crazy weather, I am freezing now!!");
+					preparePostContent("Crazy weather, I am freezing now!!");
 				} else {
 					// Temperature is normal. Am I close to any point of interest? Find one.
 					var pointOfInterest = getClosestPointOfInterest(getLocation());
@@ -192,7 +203,7 @@
 							// ** do nothing **
 						} else {
 							// Check in here!
-							showGeneratedMessage("I'm here! "+pointOfInterest.name);
+							preparePostContent("I'm here! "+pointOfInterest.name);
 						}
 					} else {
 						// We're not gonna demo this use case.
@@ -205,7 +216,7 @@
 	}
 
 	function postButtonClick() {
-		postFBStatus($('#message').html(), [609025954,543721930], 132738745815);
+		postFBStatus(prepared_message, text, prepared_place, prepared_event);
 	}
 
 </script>
