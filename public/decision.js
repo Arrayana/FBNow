@@ -49,9 +49,9 @@ function postFBStatus(message, friends, place, myEvent) {
 
   alert(message)
   // POST MESSAGE! (Currently disabled because of the ban T_T)
-  // $.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
+  $.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
   alert("Posted!!");
-  // });
+  });
 }
 
 // This will be called by message generator
