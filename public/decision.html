@@ -153,7 +153,7 @@
 				// Yes. Am I close to that event's location?
 				if (isCloseTo(getLocation(), myEvent.location)) {
 					// Yes.  Have I posted a status about this event earlier?
-					var status = searchStatusContainingPlaceName(myEvent.name);
+					var status = searchStatusContainingPlaceName(myEvent.id);
 					if (status) {
 						// Has he posted about it recently (1hr) ?
 						if (isLessThan1HourAgo(status)) {
