@@ -83,9 +83,10 @@
 		if (myEvent) {
 			storeEvent(myEvent);
 		}
-		$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
+        //TODO: Commenting this out during test
+		//$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
 			alert("Posted!!");
-		});
+		//});
 	}
 
 	// Get current location. Need callback
