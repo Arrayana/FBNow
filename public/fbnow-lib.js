@@ -139,3 +139,4 @@ function searchStatusContainingPlaceName(placeName, statuses, currentLocation){
 
   return foundPlace;
 }
+

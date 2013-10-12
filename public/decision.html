@@ -1,258 +1,157 @@
+<!DOCTYPE html>
 <html>
-<head><title>Decision tree</title>
-<script src="http://code.jquery.com/jquery-latest.min.js"></script>
-<script src="initfb.js"></script>
+  <head>
+    <title>Red-Yellow Detector</title>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.1/jquery.mobile-1.2.1.min.css" />
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+    <script src="redyellow_data.js"></script>
+    <script src="main.js"></script>
+    <script src="uiJquery.js"></script>
+
+    <style>
+   
+      .ui-li-inner{ 
+        white-space: normal !important; 
+       }
+      .multiline{
+         height: 50px;
+        vertical-align:middle !important;
+        white-space:normal !important; 
+
+      }
+
+
+      .ui-btn-inner{ 
+        white-space: normal !important; 
+      }
+    
+      .verybig {
+        font-size: 4em;
+      }
+
+    
+
+      .ui-footer {
+        position: absolute !important;
+        bottom: 0;
+        width: 100%;
+        height: 40px;
+      }
+
+
+      .ui-page, .ui-header{
+      /* background: url("https://www.google.com/images/srpr/logo11w.png");*/  /*#497bae;*/
+        background:rgb(204, 204, 204);
+
+        }
+      .ui-header{
+
+        height: 170px;
+
+      }
+      .now {
+        font-size: 4em;
+         position:relative;
+        right:-180px;
+        top:-80px;
+      }
+    </style>
+  </head>
+  <body>
+
+<div data-role="page">
+
+  <div data-role="header">
+    <img  height="168" width="317" src="http://loveletters2strangers.com/wp-content/uploads/2013/02/facebook-logo.png"  />
+
+    <span class="now">NOW!</span>
+
+  </div><!-- /header -->
+  
+
+
+  <div data-role="content"> 
+   
+    <!--  <span id="fbName"></span>
+      <h2 id="message1" data-theme="b">I am at Facebook Hackathon with Devika, Knott and Lock!!</h2>
+      <div id="message2" data-theme="b">Feeling really excited!!..</div>
+      <div id="message3" data-theme="b">Half way </div>
+      <div id="message4" data-theme="b">asdsad</div>-->
+      
+
+      <ul data-role="listview">
+        <li  id="message1"  data-icon="false" ><a  class="multiline" href="#">I am at Facebook Hackathon with Devika, Knott and Lock!!</a></li>
+        <li id="message1" data-icon="false"><a class="multiline" href="#">Feeling really excited!!.</a></li>
+        <li id="message1" data-icon="false"><a class="multiline" href="#">Half way</a></li>
+        <li id="message1" data-icon="false"><a class="multiline" href="#">asdsad</a></li>
+
+      </ul>
+
+
+    <!--
+   Within 500 miled of my latitude and longitude. you can check type of place, etc using this API
+    https://api.foursquare.com/v2/venues/explore?ll=37.48,-122.14&radius=500&client_id=QX0V0DYO0VPVBZVCPCIMINXXLBSLJ23BNV04GSWTZ4GEUQFF&client_secret=TMWVIY0RTQCQXLITI3FNTAVM4FIWB2V1LAD3U2JHR021JHSJ&v=20131011
+    -->
+      <div id="fb-root"></div>
+      <!-- <div class="fb-like" data-send="true" data-width="450" data-show-faces="true"></div> -->
+
+      <table width="100%">
+        <tr>
+          <td colspan="2" style="text-align:center">
+            <h1>Hi <span id="fbName"></span>. Click this damn button to start!</h1>
+            <button id="showButton" style="width:50%" disabled>Loading...</button>
+          </td>
+        </tr>
+        <tr>
+          <td width="50%" style="vertical-align:top"><div id="redBox" style="width:100%;background-color:#ffcccc"></div></td>
+          <td width="50%" style="vertical-align:top"><div id="yellowBox" style="width:100%;background-color:#ffffcc"></div></td>
+        </tr>
+      </table>
+
+      <div id="results" align="center">
+        Results will appear here.
+          </div>
+      <div id="quote" align="center">
+          Results will appear here.
+          <button onclick="getRandomQuote()">Get my quote</button>
+
+      </div>
+      <div id="weather" align="center">
+          Results will appear here.
+          <button onclick="getWeather()">Get my weather</button>
+
+      </div>
+      <div id="demo" align="center">
+          Results will appear here.
+          <button onclick="getLocation()">Try it</button>
+
+      </div>
+      <div id="events" align="center">
+            Ideally you see events list here.
+            <button onclick="FBFetch()">Try it</button>
+      </div>
+
+
+  </div><!-- /content -->
+
+
+  <!-- <div data-role="footer" class="ui-bar"> -->
+
+  <!-- </div> -->
+
+</div><!-- /page -->
+
+
+
+
 <script>
-var friends=[]
-var place=""
-	Storage.prototype.setObj = function(key, obj) {
-    return this.setItem(key, JSON.stringify(obj))
-}
-	Storage.prototype.getObj = function(key) {
-	    return JSON.parse(this.getItem(key))
-	}
 
-	var prepared_message,prepared_friends,prepared_place,prepared_event;
-
-
-	// Update UI to prompt user to login
-	function promptLogin(request_message) {
-		$('#showButton').removeAttr('disabled');
-		$('#showButton').html(request_message);
-		$('#showButton').off('click'); // remove previous click handler
-		$('#showButton').click(clickToLoginHandler);
-	}
-
-	// Update UI to say it's ready to go!
-	function promptStart() {
-		// Sample call: Show name
-		FB.api('/me?fields=name', function(response) {
-			$('#showButton').html('Hello '+response.name+'!');
-		});
-
-		generateStatusMessage();
-	}
-
-	// Post Facebook status
-	function postFBStatus(message, friends, place, event) {
-		var parameters = {
-			"access_token": fb_authResponse.accessToken,
-			"message": message,
-			"friends": friends.join(),
-		};
-		if (place) {
-			parameters.place = place;
-		}
-		if (event) {
-			storeEvent(event);
-		}
-		$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
-			alert("Posted!!");
-		});
-	}
-
-	function getLocation() {
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(function(position) {
-				return { "latitude": position.coords.latitude, "longitude": position.coords.longitude }
-			});
-		} else {
-			return;
-		}
-	}
-
-	function getMyHomeLocation() {
-		return {};
-	}
-
-	function preparePostContent(message, friends, place, myEvent) {
-		prepared_message = message;
-		prepared_friends = friends;
-		prepared_place = place;
-		prepared_event = myEvent;
-
-		$("#message").html(message);
-		// $("#friends..")
-		$("#postButton").removeAttr("disabled");
-	}
-
-	function getAttendingEvent(r) {
-		return { "name": "hackathon", "location": "fb hq" };
-	}
-
-	function isCloseTo(a, b) {
-		return true;
-	}
-
-
-	function storeEvent(myEvent) {
-		eventHash=localStorage.getObj('eventHash')
-		if (eventHash==null) {
-			eventHash={}
-			eventHash[myEvent.id]=myEvent
-		}
-		else {
-			eventHash[myEvent.id]=myEvent
-		}
-
-	}
-
-
-	function searchStatusContainingPlaceName(eventId) {
-		eventHash=localStorage.getObj('eventHash');
-
-		if (eventHash!=null)  {
-			return eventHash[eventId];
-		}
-
-		return null;
-	}
-
-	function isLessThan1HourAgo(myEvent) {
-
-		startTime=new Date(myEvent.start_time);
-		nowTime=new Date();
-		difference=(nowTime-startTime)
-		if (difference!=0)
-			difference=difference/1000;
-
-		if (difference<3600)
-			return true;
-		else
-			return false;
-	}
-
-	function getFullEventInformation(myEvent) {
-alert(myEvent.id)
-		FB.api('/'+myEvent.id, function(response) {
-		alert(JSON.stringify(response))
-
-
-		})
-	}
-
-	function isLessThan5HourAgo(s) {
-		return false;
-	}
-
-	function getEventTimeSpentPercent(e) {
-		return 50;
-	}
-
-	function getNormalTemperatureNow(p) {
-		return 70;
-	}
-
-	function getCurrentTemperatureNow(p) {
-		return 65;
-	}
-
-	function getClosestPointOfInterest(p) {
-		return { "name": "Fuki Sushi" };
-	}
-
-	function getMessageTimeSpentPercent(timeSpentPercent) {
-		if (timeSpentPercent<10)
-			return "Feeling excited!!.. just started"
-		if (40<timeSpentPercent && timeSpentPercent<60)
-			return "Lets keep rolling..just half way done!!!"
-		if (90<timeSpentPercent)
-			return  "Almost done!.."
-	}
-
- 	function generateStatusMessage() {
-		// Get an object from FB.api about everything I need
-		FB.api('/me?fields=name', function(response) {
-			console.log(response.name);
-
-			// Is there a happenning event that I'm suppose to be attending now?
-			var myEvent = getAttendingEvent(response);
-			if (myEvent) {
-				// Yes. Am I close to that event's location?
-				if (isCloseTo(getLocation(), myEvent.location)) {
-					// Yes.  Have I posted a status about this event earlier?
-					var status = searchStatusContainingPlaceName(myEvent.id);
-					if (status) {
-						// Has he posted about it recently (1hr) ?
-						if (isLessThan1HourAgo(status)) {
-							// Get out of this logic
-							// ** do nothing and proceed to next logic **
-						} else {
-							// More than 1 hour ago. Post the event progress!
-
-	
-							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-							preparePostContent("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent),friends,place,myEvent);
-							return;
-						}
-					} else {
-						getFullEventInformation(myEvent)
-
-						// No status about the event yet. Post a status about this event!
-						preparePostContent("I am at "+myEvent.name+"!",friends,"",myEvent);
-						return;
-					}
-				} else {
-					// I'm not close to that event. I must have missed it!
-					preparePostContent("I missed "+myEvent.name+" T_T");
-					return;
-				}
-			}
-			// No happening event.
-			// Or just posted about that event recently (< 1hr)
-			// Come to this logic!
-			if (isCloseTo(getLocation(), getMyHomeLocation())) {
-				// We're not gonna demo this use case. Skip it!
-				// ** do nothing **
-			} else {
-				// I'm not at home. Check the weather
-				var averageDegree = getNormalTemperatureNow(getLocation());
-				var currentDegree = getCurrentTemperatureNow(getLocation());
-				if (currentDegree - averageDegree > 10) {
-					// It's hotter than normal
-					preparePostContent("OMG ..It's so hot in here!!");
-				} else if (currentDegree - averageDegree < -10) {
-					// It's cooler than normal
-					preparePostContent("Crazy weather, I am freezing now!!");
-				} else {
-					// Temperature is normal. Am I close to any point of interest? Find one.
-					var pointOfInterest = getClosestPointOfInterest(getLocation());
-					if (pointOfInterest) {
-						// I'm closed to somewhere. So, have I posted about it recently?
-						var status = searchStatusContainingPlaceName(pointOfInterest.name);
-						if (isLessThan5HourAgo(status)) {
-							// No use case for this.
-							// ** do nothing **
-						} else {
-							// Check in here!
-							preparePostContent("I'm here! "+pointOfInterest.name);
-						}
-					} else {
-						// We're not gonna demo this use case.
-						// ** do nothing **
-					}
-				}
-			}
-		}); // end decision tree
-
-	}
-
-	function postButtonClick() {
-		postFBStatus(prepared_message, prepared_friends, prepared_place, prepared_event);
-	}
 
 </script>
-</head>
-<body>
-	<div id="fb-root"></div>
 
-	<button id="showButton" disabled>Checking Facebook login...</button>
-	<span id="fbName"></span>
-
-	<p>
-		Generated status message:<br>
-		<div id="message" style="font-size:3em;background-color:#ccffaa"></div><br>
-		<button id="postButton" onClick="postButtonClick()" disabled>Post!</button>
-	</p>
-</body>
+  </body>
 </html>
