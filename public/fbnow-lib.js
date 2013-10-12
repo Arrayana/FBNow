@@ -222,3 +222,50 @@ function isLessThan5HourAgo(status){
           prettyDate.indexOf('just now') > -1 ;
 
 }
+
+
+// location = {}
+function getTemperatureDiff(currentLocation, callback){
+
+  // Current temperature
+  var urlstring = "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/conditions/q/" + 
+                  currentLocation.latitude.toFixed(8) + 
+                  "," +
+                  currentLocation.longitude.toFixed(8) +
+                  ".json";
+
+  // Avg temperature                
+  var urlstring2 = "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/" + 
+                  // currentLocation.latitude.toFixed(8) + 
+                  // "," +
+                  // currentLocation.longitude.toFixed(8) +
+                  '40.450343,-80.024464'+
+                  ".json"
+
+
+    //geolookup/q/37.48,-122.14.json
+    $.ajax({  url : urlstring,
+              dataType : "jsonp", 
+              success : function(parsed_json){
+                var location = parsed_json['location']['city'];
+                var temp_f = parsed_json['current_observation']['temp_f'];
+                console.log("Current temperature in " + location + " is: " + temp_f);
+                $.ajax({ url : urlstring2,
+                  dataType : "jsonp", 
+                  success : function(parsed_json){
+                    var location = parsed_json['location']['city'];
+                    var avg_f = parsed_json['current_observation']['temp_f'];
+                    console.log("Average temperature in " + location + " is: " + avg_f);
+                    temp_diff = temp_f - avg_f;
+
+                    // Callback
+                    callback(temp_diff);
+                  }
+                });
+              }
+    });
+
+
+
+}
+
