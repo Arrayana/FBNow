@@ -313,7 +313,7 @@ function getRandomNews(callback) {
     dataType: "jsonp",
     success: function (parsed_json) {
       try {
-        var randomOrder = getRandomNumberBetween(0,10);
+        var randomOrder = getRandomNumberBetween(0,9);
         callback(parsed_json['feed'][randomOrder]['headline']);
         $.mobile.hidePageLoadingMsg()
 
