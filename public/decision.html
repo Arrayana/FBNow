@@ -185,6 +185,11 @@
 		return null;
 	}
 
+	// Search status mentioning about point of interest
+	function searchStatusContainingPointOfInterest(myEvent) {
+		
+	}
+
 	// Check if that event is recent < 1hr
 	function isLessThan1HourAgo(myEvent) {
 
@@ -242,15 +247,15 @@
 				// Is there a happenning event that I'm suppose to be attending now?
 				// Results will be { "event": {..}, "friends": [..] }
 				var eventAndFriends = getAttendingEventAndFriends(response);
+				eventAndFriends.event = undefined; /*TEST*/
 				if (eventAndFriends.event != undefined) {
 					var myEvent = eventAndFriends.event;
 					var friendsInEvent = eventAndFriends.friends;
-					// alert(myEvent.name + " and "+ friendsInEvent.join()); return;
-					// postFBStatus("Yo! "+results.event.name, results.friends, 166793820034304);
-					// return;
 
 					// Yes. Am I close to that event's location?
-					if (isCloseToEachOther(currentLocation, myEvent.venue)) {
+					var isCloseToEvent = isCloseToEachOther(currentLocation, myEvent.venue);
+					// var isCloseToEvent = false; /*TEST*/
+					if (isCloseToEvent) {
 						// alert("I'm close to "+myEvent.name); return;
 
 						// Yes. Have I posted a status about this event earlier?
@@ -300,17 +305,31 @@
 					// ** do nothing **
 				} else {
 					// I'm not at home. Check the weather
-					var averageDegree = getNormalTemperatureNow(getLocation());
-					var currentDegree = getCurrentTemperatureNow(getLocation());
+					var averageDegree = getNormalTemperatureNow(currentLocation);
+					var currentDegree = getCurrentTemperatureNow(currentLocation);
 					if (currentDegree - averageDegree > 10) {
 						// It's hotter than normal
-						showGeneratedMessage("OMG ..It's so hot in here!!");
+						preparePostContent(
+							"OMG ..It's so hot in here!!", // message
+							[], // friend
+							null, // place
+							null // event
+							);
+						return;
+
 					} else if (currentDegree - averageDegree < -10) {
 						// It's cooler than normal
-						showGeneratedMessage("Crazy weather, I am freezing now!!");
+						preparePostContent(
+							"Crazy weather, I am freezing now!!", // message
+							[], // friend
+							null, // place
+							null // event
+							);
+						return;
+
 					} else {
 						// Temperature is normal. Am I close to any point of interest? Find one.
-						var pointOfInterest = getClosestPointOfInterest(getLocation());
+						var pointOfInterest = getClosestPointOfInterest(currentLocation);
 						if (pointOfInterest) {
 							// I'm closed to somewhere. So, have I posted about it recently?
 							var status = searchStatusContainingPointOfInterest(pointOfInterest.name);
@@ -319,12 +338,18 @@
 								// ** do nothing **
 							} else {
 								// Check in here!
-								preparePostContent("I'm here! "+pointOfInterest.name);
+								preparePostContent(
+									"I'm here! "+pointOfInterest.name, // message
+									[], // friend
+									pointOfInterest.id, // place
+									null // event
+									);
+								return;
+
 							}
 						}
 					}
 				}
-
 
 			}); // end callback of getCurrentLocation()
 
@@ -345,9 +370,8 @@
 	<span id="fbName"></span>
 
 	<p>
-		Generated status message:<br>
-		<div id="message" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="postButtonClick()">Post!</button>
+		<div id="message" style="font-size:3em;background-color:#ccffaa">Generating status message..</div><br>
+		<button id="postButton" onClick="postButtonClick()" disabled>Post!</button>
 	</p>
 </body>
 </html>
