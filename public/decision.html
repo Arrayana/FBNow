@@ -71,8 +71,10 @@
 		var parameters = {
 			"access_token": fb_authResponse.accessToken,
 			"message": message,
-			"tags": friends.join(),
+			//"tags": friends.join(),
 		};
+		if (friends) 
+			parameters.tags =friends.join()
 		if (place) {
 			parameters.place = place;
 		}
