@@ -1,0 +1,88 @@
+<html>
+<head><title>Decision tree</title>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="main.js"></script>
+<script>
+	function postFBStatus(message) {
+		alert(message);
+	}
+
+	function generateStatusMessage() {
+		// Get an object from FB.api about everything I need
+		FB.api('/me?fields=name', function(response) {
+			console.log(response.name);
+
+			// Is there a happenning event that I'm suppose to be attending now?
+			var myEvent = getAttendingEvent(response);
+			if (myEvent) {
+				// Yes. Am I close to that event's location?
+				if (isCloseTo(getLocation(), myEvent.location)) {
+					// Yes.  Have I posted a status about this event earlier?
+					var status = searchStatusContainingPlaceName(myEvent.name);
+					if (status) {
+						// Has he posted about it recently (1hr) ?
+						if (isLessThan1HourAgo(status)) {
+							// Get out of this logic
+							// ** do nothing and proceed to next logic **
+						} else {
+							// More than 1 hour ago. Post the event progress!
+							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
+							postFBStatus("I am still at "+myEvent.name+". "+timeSpentPercent+"%");
+							return;
+						}
+					} else {
+						// No status about the event yet. Post a status about this event!
+						postFBStatus("I am at "+myEvent.name+"!");
+						return;
+					}
+				} else {
+					// I'm not close to that event. I must have missed it!
+					postFBStatus("I missed the event :"+myEvent.name);
+					return;
+				}
+			}
+			// No happening event.
+			// Or just posted about that event recently (< 1hr)
+			// Come to this logic!
+			if (isCloseToHome(getLocation(), myHomeLocation)) {
+				// We're not gonna demo this use case. Skip it!
+				// ** do nothing **
+			} else {
+				// I'm not at home. Check the weather
+				var averageDegree = getNormalTemperatureNow(getLocation());
+				var currentDegree = getCurrentTemperatureNow(getLocation());
+				if (currentDegree - averageDegree > 10) {
+					// It's hotter than normal
+					postFBStatus("It's so hot!!");
+				} else if (currentDegree - averageDegree < -10) {
+					// It's cooler than normal
+					postFBStatus("It's so cold!!");
+				} else {
+					// Temperature is normal. Am I close to any point of interest? Find one.
+					var pointOfInterest = getClosestPointOfInterest(getLocation());
+					if (pointOfInterest) {
+						// I'm closed to somewhere. So, have I posted about it recently?
+						var status = searchStatusContainingPlaceName(pointOfInterest.name);
+						if (isLessThan5HourAgo(status)) {
+							// No use case for this.
+							// ** do nothing **
+						} else {
+							// Check in here!
+							postFBStatus("I'm here! "+pointOfInterest.name);
+						}
+					} else {
+						// We're not gonna demo this use case.
+						// ** do nothing **
+					}
+				}
+			}
+		}); // end decision tree
+
+	}
+
+</script>
+</head>
+<body>
+	<div id="fb-root"></div>
+</body>
+</html>
