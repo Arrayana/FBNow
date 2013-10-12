@@ -278,22 +278,35 @@ function searchStatusContainingEvent(myEvent) {
 }
 
 /* ================= Random quote & news ==================== */
-function getRandomQuote(callback) {
-  $.ajax({
-    url: "http://api.theysaidso.com/qod.js?category=life", //http://www.iheartquotes.com/api/v1/random.json",
-    dataType: "jsonp",
-    success: function (parsed_json) {
-      callback(parsed_json['data']['contents']['quote']);
-    }
-  });
-}
-
 function getRandomNews(callback) {
   $.ajax({
     url: "http://api.espn.com/v1/now/popular?apikey=tpnk43zgq4uqrpage6fjhsn8", //http://www.iheartquotes.com/api/v1/random.json",
     dataType: "jsonp",
     success: function (parsed_json) {
-      callback(parsed_json['feed'][0]['headline']);
+      try {
+        var randomOrder = getRandomNumberBetween(0,10);
+        callback(parsed_json['feed'][randomOrder]['headline']);
+      } catch (err) {
+        console.log("Error getting news: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
+      }
+    }
+  });
+}
+
+function getRandomNumberBetween(min, max){
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function getRandomQuote(callback) {
+  $.ajax({
+    url: "http://api.theysaidso.com/qod.js?category=life", //http://www.iheartquotes.com/api/v1/random.json",
+    dataType: "jsonp",
+    success: function (parsed_json) {
+      try {
+        callback(parsed_json['data']['contents']['quote']);
+      } catch (err) {
+        console.log("Error getting quote: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
+      }
     }
   });
 }
