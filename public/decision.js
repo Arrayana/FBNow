@@ -49,9 +49,9 @@ function postFBStatus(message, friends, place, myEvent) {
 
   alert(message)
   // POST MESSAGE! (Currently disabled because of the ban T_T)
-  //$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
+  // $.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
   alert("Posted!!");
-  //});
+  // });
 }
 
 // This will be called by message generator
@@ -78,7 +78,6 @@ function preparePostContent(type, message, friends, place, myEvent) {
 var fieldsNeeded = "name,events.fields(name,venue,attending.fields(id),end_time,start_time),friends.fields(id,name)";
 //
 function generateStatusMessage() {
-<<<<<<< HEAD
 	
 	console.log("Getting data from Graph API..");
   // Get an object from FB.api about everything I need
