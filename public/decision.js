@@ -231,7 +231,7 @@ function generateStatusMessage() {
               "location",
               "I'm here! " + pointOfInterest.name, // message
               [], // friend
-              null, // place
+              pointOfInterest.id, // place
               null // event
             );
 
