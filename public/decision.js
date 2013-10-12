@@ -35,8 +35,12 @@ function postFBStatus(message, friends, place, myEvent) {
   };
   // Tag friends if friends are provided
   if (friends && friends != "") {
-    parameters.tags = friends.join();
-    alert("Also tag these guys: "+friends.join());
+  	var friendsIDList = [];
+  	for (var i=0; i<friends.length; i++) {
+  		friendsIDList.push(friends[i].id);
+  	}
+    parameters.tags = friendsIDList.join();
+    alert("Also tag these guys: "+friendsIDList.join());
   }
   // Tag place if place is provided
   if (place) {
