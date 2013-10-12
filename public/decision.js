@@ -51,10 +51,10 @@ function postFBStatus(message, friends, place, myEvent) {
     storeEvent(myEvent);
   }
 
-  alert(message)
+  //alert(message)
   // POST MESSAGE! (Currently disabled because of the ban T_T)
   $.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
-  alert("Posted!!");
+  //alert("Posted!!");
   });
 }
 
@@ -129,8 +129,10 @@ function generateStatusMessage() {
             var status = searchStatusContainingEvent(myEvent);
             if (status) {
               //when a message about this event has been posted
-              // Has he posted about it recently (1hr) ?
-              if (isLessThan1HourAgo(status)) {
+              // Has he posted about it recently (1hr) ? 
+
+              if (isEventLessThan1HourAgo(status)) {
+
                 // Get out of this logic
                 // ** do nothing and proceed to next logic **
               } else {
@@ -138,7 +140,7 @@ function generateStatusMessage() {
                 var timeSpentPercent = getEventTimeSpentPercent(myEvent);
                 preparePostContent("event", // content type
                   "I am still at " + myEvent.name + ". " + getMessageTimeSpentPercent(timeSpentPercent), // message
-                  [], // friends (no friends to avoid disturbing them)
+                  friendsInEvent, // friends (no friends to avoid disturbing them)
                   myEvent.venue.id, // place
                   myEvent // event
                 );
@@ -252,5 +254,7 @@ function generateStatusMessage() {
 // Event handler for POST Button
 //
 function postButtonClick(type) {
+
     postFBStatus(prepared_message[type], prepared_friends[type], prepared_place[type], prepared_event[type]);
+    generateStatusMessage();
 }

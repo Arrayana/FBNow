@@ -137,6 +137,31 @@ function isLessThan1HourAgo(status) {
 
 }
 
+function getEventTimeSpentPercent(myEvent) {
+  startTime= new Date(myEvent.start_time);
+  endTime=new Date(myEvent.end_time);
+  completedTime =now-startTime;
+  totalTime =endTime-startTime;
+  return 90;
+  //return (completedTime/totalTime)*100;
+}
+
+function isEventLessThan1HourAgo(status) {
+  startTime= new Date(status.start_time);
+  now= new Date();
+
+  difference=now-startTime;
+  if (difference !=0)
+    difference=difference/1000;
+
+  if (difference<3600)
+    return true
+  else
+    return false
+
+
+}
+
 function isLessThan5HourAgo(status) {
   var prettyDate = timeAgo(status.updated_time);
   console.log(prettyDate);
@@ -247,12 +272,15 @@ function getAttendingEventAndFriends(response) {
 }
 
 function getMessageTimeSpentPercent(timeSpentPercent) {
-  if (timeSpentPercent < 10)
+
+  if (timeSpentPercent <= 10)
     return "Feeling excited!!.. just started"
-  if (40 < timeSpentPercent && timeSpentPercent < 60)
+  if (40 <= timeSpentPercent && timeSpentPercent <= 60)
     return "Lets keep rolling..just half way done!!!"
-  if (90 < timeSpentPercent)
+  if (90 <= timeSpentPercent)
     return "Almost done!.."
+  return "meh"
+
 }
 
 // Store "myEvent" into offline storage
@@ -264,6 +292,8 @@ function storeEvent(myEvent) {
   } else {
     eventHash[myEvent.id] = myEvent;
   }
+
+  localStorage.setObj('eventHash',eventHash)
 }
 
 // Search status mentioning about that place or event
