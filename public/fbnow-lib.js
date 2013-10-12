@@ -287,7 +287,7 @@ function getRandomNews(callback) {
         var randomOrder = getRandomNumberBetween(0,10);
         callback(parsed_json['feed'][randomOrder]['headline']);
       } catch (err) {
-        console.log("Error getting news: "+err.message+"\nResponse: "+parsed_json);
+        console.log("Error getting news: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
       }
     }
   });
@@ -305,7 +305,7 @@ function getRandomQuote(callback) {
       try {
         callback(parsed_json['data']['contents']['quote']);
       } catch (err) {
-        console.log("Error getting quote: "+err.message+"\nResponse: "+parsed_json);
+        console.log("Error getting quote: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
       }
     }
   });
