@@ -34,13 +34,13 @@ function postFBStatus(message, friends, place, myEvent) {
     "message": message
   };
   // Tag friends if friends are provided
-  if (friends && friends != "") {
+  if (friends) {
   	var friendsIDList = [];
   	for (var i=0; i<friends.length; i++) {
   		friendsIDList.push(friends[i].id);
   	}
     parameters.tags = friendsIDList.join();
-    alert("Also tag these guys: "+friendsIDList.join());
+    // alert("Also tag these guys: "+friendsIDList.join());
   }
   // Tag place if place is provided
   if (place) {
@@ -140,7 +140,7 @@ function generateStatusMessage() {
                 var timeSpentPercent = getEventTimeSpentPercent(myEvent);
                 preparePostContent("event", // content type
                   "I am still at " + myEvent.name + ". " + getMessageTimeSpentPercent(timeSpentPercent), // message
-                  friendsInEvent, // friends (no friends to avoid disturbing them)
+                  null, // friends (no friends to avoid disturbing them)
                   myEvent.venue.id, // place
                   myEvent // event
                 );
@@ -161,7 +161,7 @@ function generateStatusMessage() {
             // I'm not close to that event. I must have missed it!
             preparePostContent("event",
               "I missed " + myEvent.name + " T_T", // message
-              [], // friend
+              null, // friend
               null, // place
               null // event
             );
@@ -171,7 +171,7 @@ function generateStatusMessage() {
           // No happening event.
           preparePostContent("event",
             "Bored and looking for events. Any ideas?", // message
-            [], // friend
+            null, // friend
             null, // place
             null // event
           );
@@ -187,7 +187,7 @@ function generateStatusMessage() {
                 getRandomQuote(function(result) {
                     preparePostContent("weather",
                         result,
-                        [], // friend
+                        null, // friend
                         null, // place
                         null // event
                     );
@@ -199,7 +199,7 @@ function generateStatusMessage() {
                 // It's hotter than normal
                 preparePostContent("weather",
                   "OMG ..It's so hot in here!!",
-                  [], // friend
+                  null, // friend
                   null, // place
                   null // event
                 );
@@ -208,13 +208,13 @@ function generateStatusMessage() {
                 // It's cooler than normal
                 preparePostContent("weather",
                   "Crazy weather, I'm freezing now!",
-                  [], // friend
+                  null, // friend
                   null, // place
                   null // event
                 );
               } else {
                 preparePostContent("weather", "Boring weather.. same old!!",
-                    [], // friend
+                  null, // friend
                   null, // place
                   null // event
                 );
@@ -230,7 +230,7 @@ function generateStatusMessage() {
             preparePostContent(
               "location",
               "I'm here! " + pointOfInterest.name, // message
-              [], // friend
+              null, // friend
               pointOfInterest.id, // place
               null // event
             );
@@ -253,7 +253,8 @@ function generateStatusMessage() {
             // I'm closed to somewhere. So, have I posted about it recently?
             preparePostContent(
               "quote",
-              quoteResult, [], // friend
+              quoteResult, // message
+              null, // friend
               null, // place
               null // event
             );
