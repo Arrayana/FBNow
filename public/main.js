@@ -7,6 +7,9 @@ var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists
 $(document).ready(function() {
   console.log('Initializing FB SDK. Requesting permissions: '+required_permissions);
 
+  console.log('Initializing FB now global variable...');
+  if(window.fbnow == null) window.fbnow = {};
+
   $.ajaxSetup({ cache: true });
   $.getScript('//connect.facebook.net/en_UK/all.js', function(){
     window.fbAsyncInit = function() {
@@ -32,21 +35,28 @@ $(document).ready(function() {
   });
 });
 
-/* --- Location functions --- */
-function getLocation()
-{
+/***Location functions
+*/
+function getLocation(){
   var x=document.getElementById("demo");
-  if (navigator.geolocation)
-  {
+  if (navigator.geolocation){
+    // Async function, no return via return
     navigator.geolocation.getCurrentPosition(showPosition);
   }
-  else{x.innerHTML="Geolocation is not supported by this browser.";}
+  else{
+    x.innerHTML="Geolocation is not supported by this browser.";
+  }
 }
-function showPosition(position)
-{
+
+function showPosition(position){
   var x=document.getElementById("demo");
   x.innerHTML="Latitude: " + position.coords.latitude +
   "<br>Longitude: " + position.coords.longitude;
+
+  // Set as global variable
+  window.fbnow['current_location'] = {'latitude': position.coords.latitude, 
+                                      'longitude': position.coords.longitude }
+  
 }
 function getPosition(position)
 {
@@ -80,7 +90,7 @@ function checkUser() {
   FB.getLoginStatus(function(response) {
     if (response.status === 'connected') {
       // Logged in
-      fb_authResponse = response;
+      fb_authResponse = response.authResponse;
 
       // Check required permissions
       console.log("checking permissions..");
@@ -239,7 +249,32 @@ function start() {
   $('#showButton').attr('disabled','disabled');
   $('#results').html('Processing..');
 
-  FB.api('/me?fields=likes,subscribedto', function(response) {
+  FB.api('/me?fields=likes,subscribedto,feed', function(response) {
+
+    var eventList = [
+      {
+        "name": "Lekkiko & Monkeyz wedding party!!", 
+        "location": "Veravian Resort", 
+        "id": "548939438509329", 
+        "start_time": "2013-11-09T17:00:00+0700"
+      }, 
+      {
+        "name": "Pao's Farewell Party", 
+        "location": "New Krung Thai Restaurant", 
+        "id": "555355841184544", 
+        "start_time": "2013-10-11T19:30:00-0700"
+      }, 
+      {
+        "name": "Facebook NorCal Regional Hackathon", 
+        "location": "Facebook HQ", 
+        "id": "152339121642221", 
+        "start_time": "2013-10-11T17:00:00-0700"
+      }
+    ];
+
+    console.log(isCloseToTheEvent(window.fbnow.current_location, eventList));
+
+
     $('#results').html('');
 
     fb_response = response;

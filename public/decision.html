@@ -21,6 +21,19 @@
 		generateStatusMessage();
 	}
 
+	// Post Facebook status
+	function postFBStatus(message, friends, place) {
+		var parameters = {
+			"access_token": fb_authResponse.accessToken,
+			"message": message,
+			"tags": friends.join(),
+			"place": place,
+		};
+		$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
+			alert("Post result: " + data);
+		});
+	}
+
 	function getLocation() {
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(function(position) {
@@ -37,6 +50,7 @@
 
 	function showGeneratedMessage(message) {
 		$("#message").html(message);
+		$("#postButton").removeAttr("disabled");
 	}
 
 	function getAttendingEvent(r) {
@@ -75,7 +89,16 @@
 		return { "name": "Fuki Sushi" };
 	}
 
-	function generateStatusMessage() {
+	function getMessageTimeSpentPercent(timeSpentPercent) {
+		if (timeSpentPercent<10)
+			return "Feeling excited!!.. just started"
+		if (40<timeSpentPercent && timeSpentPercent<60)
+			return "Lets keep rolling..just half way done!!!"
+		if (90<timeSpentPercent)
+			return  "Almost done!.."
+	}
+
+ 	function generateStatusMessage() {
 		// Get an object from FB.api about everything I need
 		FB.api('/me?fields=name', function(response) {
 			console.log(response.name);
@@ -95,7 +118,7 @@
 						} else {
 							// More than 1 hour ago. Post the event progress!
 							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-							showGeneratedMessage("I am still at "+myEvent.name+". "+timeSpentPercent+"%");
+							showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
 							return;
 						}
 					} else {
@@ -121,10 +144,10 @@
 				var currentDegree = getCurrentTemperatureNow(getLocation());
 				if (currentDegree - averageDegree > 10) {
 					// It's hotter than normal
-					showGeneratedMessage("It's so hot!!");
+					showGeneratedMessage("OMG ..It's so hot in here!!");
 				} else if (currentDegree - averageDegree < -10) {
 					// It's cooler than normal
-					showGeneratedMessage("It's so cold!!");
+					showGeneratedMessage("Crazy weather, I am freezing now!!");
 				} else {
 					// Temperature is normal. Am I close to any point of interest? Find one.
 					var pointOfInterest = getClosestPointOfInterest(getLocation());
@@ -148,6 +171,10 @@
 
 	}
 
+	function postButtonClick() {
+		postFBStatus($('#message').html(), [609025954,543721930], 132738745815);
+	}
+
 </script>
 </head>
 <body>
@@ -158,7 +185,8 @@
 
 	<p>
 		Generated status message:<br>
-		<div id="message" style="font-size:3em;background-color:#ccffaa"></div>
+		<div id="message" style="font-size:3em;background-color:#ccffaa"></div><br>
+		<button id="postButton" onClick="postButtonClick()" disabled>Post!</button>
 	</p>
 </body>
 </html>
