@@ -89,13 +89,12 @@
       
 
       <ul data-role="listview">
-        <li  id="message1"  data-icon="false" ><a id="messageEvent" class="multiline" href="#">I am at Facebook Hackathon with Devika, Knott and Lock!!</a></li>
-        <li id="message1" data-icon="false"><a id="messageWeather" class="multiline" href="#">Feeling really excited!!.</a></li>
-        <li id="message1" data-icon="false"><a id="messageLocation" class="multiline" href="#">Half way</a></li>
-        <li id="message1" data-icon="false"><a class="multiline" href="#">asdsad</a></li>
-
+        <li  id="slideEvent"  data-icon="false" ><a onclick="postButtonClick('event')" id="messageEvent" class="multiline" href="#"></a></li>
+        <li id="slideWeather" data-icon="false"><a onclick="postButtonClick('weather')" id="messageWeather" class="multiline" href="#"></a></li>
+        <li id="slideLocation" data-icon="false"><a onclick="postButtonClick('location')" id="messageLocation" class="multiline" href="#"></a></li>
+        <li id="slideQuote" data-icon="false"><a onclick="postButtonClick('quote')" id="messageQuote" class="multiline" href="#">asdsad</a></li>
       </ul>
-<button id="postButton" onClick="postButtonClick()">Post!</button>
+    <!--button id="postButton" onClick="postButtonClick('event')">Post!</button-->
 
     <!--
    Within 500 miled of my latitude and longitude. you can check type of place, etc using this API

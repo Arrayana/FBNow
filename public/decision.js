@@ -1,10 +1,4 @@
-<html>
-<head><title>Decision tree</title>
-	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
-	<script src="initfb.js"></script>
-	<script src="fbnow-lib.js"></script>
-	<script>
-	/**** Local storage ***/
+/**** Local storage ***/
 	Storage.prototype.setObj = function(key, obj) {
     return this.setItem(key, JSON.stringify(obj))
 	}
@@ -37,8 +31,10 @@
 
 	/**********************/
 
-	var prepared_message,prepared_friends,prepared_place,prepared_event;
-
+	var prepared_message=new Object;
+	var prepared_friends=new Object;
+	var prepared_place= new Object;
+	var prepared_event= new Object
 	// Update UI to prompt user to login
 	function promptLogin(request_message) {
 		$('#showButton').removeAttr('disabled');
@@ -68,22 +64,29 @@
 
 	// Post Facebook status
 	function postFBStatus(message, friends, place, myEvent) {
+		alert(message)
+				
+
 		var parameters = {
 			"access_token": fb_authResponse.accessToken,
-			"message": message,
+			"message": message
 			//"tags": friends.join(),
 		};
-		if (friends) 
+		if (friends && friends!="") {
 			parameters.tags =friends.join()
+			alert(friends)
+
+			}
 		if (place) {
 			parameters.place = place;
 		}
 		if (myEvent) {
 			storeEvent(myEvent);
 		}
-		$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
+        //TODO: Commenting this out during test
+		//$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
 			alert("Posted!!");
-		});
+		//});
 	}
 
 	// Get current location. Need callback
@@ -100,47 +103,12 @@
 		return {"latitude": 0, "longitude": 0};
 	}
 
-    //Check if the whether is too hot
-    function isOptimalWeather(){
-        if (window.fbnow == null){
-            window.fbnow = {};
-        } window.fbnow.abc = "37.48,-122.14";
-        /*Populate fbnow.abc
-
-        if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(getPosition);
-            //alert(window.fbnow.abc);
-        }
-        var temp_diff =0;
-        jQuery(document).ready(function($)  {
-            //geolookup/q/37.48,-122.14.json
-            $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/conditions/q/"+window.fbnow.abc+".json",
-                dataType : "jsonp", success : function(parsed_json)
-                {
-                    var location = parsed_json['location']['city'];
-                    var temp_f = parsed_json['current_observation']['temp_f'];
-                    alert("Current temperature in " + location + " is: " + temp_f);
-                    $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/"+window.fbnow.abc+".json",
-                        dataType : "jsonp", success : function(parsed_json)
-                        {
-                            var location = parsed_json['location']['city'];
-                            var avg_f = parsed_json['current_observation']['temp_f'];
-                            alert("Average temperature in " + location + " is: " + temp_f);
-                            temp_diff = temp_f - avg_f;
-                        }
-                    });
-                }
-            });
-        });
-        alert("good it is " + temp_diff) ;//If temp_diff > 2 too hot, <2  too cold...we can add conditions...
-    }
-
 	// Prepare content, wait for user to post
 	function preparePostContent(type,message, friends, place, myEvent) {
-		prepared_message = message;
-		prepared_friends = friends;
-		prepared_place = place;
-		prepared_event = myEvent;
+		prepared_message[type] = message;
+		prepared_friends[type] = friends;
+		prepared_place[type] = place;
+		prepared_event[type] = myEvent;
 
 
 		if (type=="event")
@@ -149,7 +117,8 @@
 		$("#messageWeather").html(message);
 		if (type=="location")
 		$("#messageLocation").html(message);
-		// $("#friends..")
+        if (type=="quote")
+        $("#messageQuote").html(message);// $("#friends..")
 		$("#postButton").removeAttr("disabled");
 	}
 
@@ -252,6 +221,14 @@
 		return 50;
 	}
 
+	function getNormalTemperatureNow(p) {
+		return 70;
+	}
+
+	function getCurrentTemperatureNow(p) {
+		return 65;
+	}
+
 	function getMessageTimeSpentPercent(timeSpentPercent) {
 		if (timeSpentPercent<10)
 			return "Feeling excited!!.. just started"
@@ -273,7 +250,6 @@
 				// Is there a happenning event that I'm suppose to be attending now?
 				// Results will be { "event": {..}, "friends": [..] }
 				var eventAndFriends = getAttendingEventAndFriends(response);
-				eventAndFriends.event = undefined; /*TEST*/
 				if (eventAndFriends.event != undefined) {
 					var myEvent = eventAndFriends.event;
 					var friendsInEvent = eventAndFriends.friends;
@@ -295,7 +271,7 @@
 							} else {
 								// More than 1 hour ago. Post the event progress!
 								var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-								("event",
+                                preparePostContent("event",
 									"I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent), // message
 									[], // friends (no friends to avoid disturbing them)
 									myEvent.venue.id, // place
@@ -323,17 +299,17 @@
 							null // no event
 							);
 						//return;
-					} // end if (isCloseToEvent) 
+					}
 				} else {
 				// No happening event.
 						preparePostContent("event",
-							"Nothing interesting in my life"+" T_T", // message
+							"Bored and looking for events. Any ideas?", // message
 							[], // no friend
 							null, // no place
 							null // no event
 							);
 
-				} // end if (eventAndFriends.event != undefined)
+				}
 
 				// Or just posted about that event recently (< 1hr)
 				// Come to this logic!
@@ -342,39 +318,48 @@
 				
 				
 
-					getTemperatureDiff(currentLocation, function(temperatureDiff){
-						if (temperatureDiff > 10) {
-							// It's hotter than normal
-							preparePostContent("weather",
-								"OMG ..It's so hot in here!!", 
-								[], // no friend
-								null, // no place
-								null // no event
-								);
-					
-						} else if (temperatureDiff < -10) {
-							// It's cooler than normal
-							preparePostContent("weather",
-								"Crazy weather, I'm freezing now!", 
-								[], // no friend
-								null, // no place
-								null // no event
-								);
-						} else {
-							preparePostContent("weather","bahhh boring weather.. same old!!", 
-								[], // no friend
-								null, // no place
-								null // no event
-								);
-						}
-					});
-					
+					var averageDegree = getNormalTemperatureNow(currentLocation);
+					var currentDegree = getCurrentTemperatureNow(currentLocation);
+
+					if (currentDegree - averageDegree > 2) {
+						// It's hotter than normal
+						preparePostContent("weather",
+							"OMG ..It's so hot in here!!", 
+							[], // no friend
+							null, // no place
+							null // no event
+							);
+				
+					} else if (currentDegree - averageDegree < -2) {
+						// It's cooler than normal
+						preparePostContent("weather",
+							"Crazy weather, I'm freezing now!", 
+							[], // no friend
+							null, // no place
+							null // no event
+							);
+					} else {
+						preparePostContent("weather",
+                            "bahhh boring weather.. same old!!",
+							[], // no friend
+							null, // no place
+							null // no event
+							);
+					}
+
+
 				//	var pointOfInterest = getClosestPointOfInterest(currentLocation, function () {});
 
 					getClosestPointOfInterest(currentLocation, function (pointOfInterest) {
 					if (pointOfInterest) {
 							// I'm closed to somewhere. So, have I posted about it recently?
-							preparePostContent("location","I'm here! "+pointOfInterest.name);
+							preparePostContent(
+                                "location",
+                                "I'm here! "+pointOfInterest.name,
+                                [], // friend
+                                null, // place
+                                null // event
+                                );
 
 							/*var status = searchStatusContainingPointOfInterest(pointOfInterest.name);
 							if (isLessThan5HourAgo(status)) {
@@ -384,11 +369,22 @@
 								// Check in here!
 								preparePostContent("I'm here! "+pointOfInterest.name);
 							}*/
-						}	
+						}
 
 
 					});
-						
+                getRandomQuote(function (quoteResult) {
+                    if (quoteResult) {
+                        // I'm closed to somewhere. So, have I posted about it recently?
+                        preparePostContent(
+                            "quote",
+                            quoteResult,
+                            [], // friend
+                            null, // place
+                            null // event
+                        );
+                    }
+                });
 
 			}); // end callback of getCurrentLocation()
 
@@ -396,37 +392,17 @@
 
 	}
 
-	function postButtonClick() {
-		postFBStatus(prepared_message, prepared_friends, prepared_place, prepared_event);
+	function postButtonClick(type) {
+
+		postFBStatus(prepared_message[type], prepared_friends[type], prepared_place[type], prepared_event[type]);
 	}
 
-</script>
-</head>
-<body>
-	<div id="fb-root"></div>
 
-	<button id="showButton" disabled>Checking Facebook login...</button>
-	<span id="fbName"></span>
-
-	<p>
-		Generated status message:<br>
-		<div id="messageEvent" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="postButtonClick()">Post!</button>
-
-	</p>
-
-	<p>
-		Generated status message:<br>
-		<div id="messageWeather" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="">Post!</button>
-	</p>
-
-
-	<p>
-		Generated status message:<br>
-		<div id="messageLocation" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="">Post!</button>
-	</p>
-
-</body>
-</html>
+    function getRandomQuote(callback) {
+        $.ajax({ url : "http://api.theysaidso.com/qod.js?category=life", //http://www.iheartquotes.com/api/v1/random.json",
+            dataType : "jsonp", success : function(parsed_json)
+            {
+                callback(parsed_json['data']['contents']['quote']);
+            }
+        });
+    }
