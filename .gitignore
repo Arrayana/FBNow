@@ -16,3 +16,5 @@
 
 # Ignore all uploaded files
 /public/system/**
+.idea
+.idea/**
