@@ -34,13 +34,13 @@ function postFBStatus(message, friends, place, myEvent) {
     "message": message
   };
   // Tag friends if friends are provided
-  if (friends && friends != "") {
-  	var friendsIDList = [];
-  	for (var i=0; i<friends.length; i++) {
-  		friendsIDList.push(friends[i].id);
-  	}
+  if (friends) {
+    var friendsIDList = [];
+    for (var i=0; i<friends.length; i++) {
+      friendsIDList.push(friends[i].id);
+    }
     parameters.tags = friendsIDList.join();
-    //alert("Also tag these guys: "+friendsIDList.join());
+    // alert("Also tag these guys: "+friendsIDList.join());
   }
   // Tag place if place is provided
   if (place) {
@@ -52,13 +52,26 @@ function postFBStatus(message, friends, place, myEvent) {
   }
 
   //alert(message)
-
   // POST MESSAGE! (Currently disabled because of the ban T_T)
-  $("#feedback").html('Posting...')
   $.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
-    $("#feedback").html("Your new status was successfully posted")
-    setTimeout(function(){ $("#feedback").html('')},3000)
-  //alert("Posted!!");
+
+    $('#feedback').html("Your status was successfully posted")
+   
+    setInterval(function(){ 
+      $('#feedback').html("")
+      $('#feedback').css("color","rgb(59, 89, 152)")
+
+    },5000);
+  })
+    .fail( function(xhr, textStatus, errorThrown) {
+    
+      $('#feedback').css("color","rgb(255, 0, 0)")
+      $('#feedback').html("Ooops, there was an error. Please try again")
+      
+      setInterval(function(){  
+        $('#feedback').html("")
+        $('#feedback').css("color","rgb(59, 89, 152)")
+    },5000);
   });
 }
 
@@ -74,19 +87,19 @@ function preparePostContent(type, message, friends, place, myEvent) {
   if (type == "event") {
     $("#messageEvent").html(message);
     if (friends && friends.length>0) {
-	    var friendsName = [];
-	    for (i=0; i < friends.length; i++) {
-	    	// Maximum 5 friends name to display
-	    	if (i == 5) {
-	    		friendsName.push("and "+(friends.length-i)+" more");
-	    		break;
-	    	} else {
-	    		friendsName.push(friends[i].name);
-	    	}
-	    }
-	  	$("#messageEvent").append("<br><small>with friend(s): <span style='color:#336699'></span></small>");
-	  	$("#messageEvent small span").html(friendsName.join());
-	  }
+      var friendsName = [];
+      for (i=0; i < friends.length; i++) {
+        // Maximum 5 friends name to display
+        if (i == 5) {
+          friendsName.push("and "+(friends.length-i)+" more");
+          break;
+        } else {
+          friendsName.push(friends[i].name);
+        }
+      }
+      $("#messageEvent").append("<br><small>with friend(s): <span style='color:#336699'></span></small>");
+      $("#messageEvent small span").html(friendsName.join());
+    }
   }
   if (type == "weather") {
     $("#messageWeather").html(message);
@@ -106,8 +119,8 @@ function preparePostContent(type, message, friends, place, myEvent) {
 var fieldsNeeded = "name,events.fields(name,venue,attending.fields(id),end_time,start_time),friends.fields(id,name)";
 //
 function generateStatusMessage() {
-	
-	console.log("Getting data from Graph API..");
+  
+  console.log("Getting data from Graph API..");
   // Get an object from FB.api about everything I need
   FB.api('/me?fields='+fieldsNeeded, function (response) {
       console.log("Got response from Graph API! " + response.name);
@@ -144,7 +157,7 @@ function generateStatusMessage() {
                 var timeSpentPercent = getEventTimeSpentPercent(myEvent);
                 preparePostContent("event", // content type
                   "I am still at " + myEvent.name + ". " + getMessageTimeSpentPercent(timeSpentPercent), // message
-                  friendsInEvent, // friends (no friends to avoid disturbing them)
+                  null, // friends (no friends to avoid disturbing them)
                   myEvent.venue.id, // place
                   myEvent // event
                 );
@@ -165,7 +178,7 @@ function generateStatusMessage() {
             // I'm not close to that event. I must have missed it!
             preparePostContent("event",
               "I missed " + myEvent.name + " T_T", // message
-              [], // friend
+              null, // friend
               null, // place
               null // event
             );
@@ -175,7 +188,7 @@ function generateStatusMessage() {
           // No happening event.
           preparePostContent("event",
             "Bored and looking for events. Any ideas?", // message
-            [], // friend
+            null, // friend
             null, // place
             null // event
           );
@@ -185,30 +198,45 @@ function generateStatusMessage() {
         /*** Weather ***/
 
         getTemperatureDiff(currentLocation, function (temperatureDiff) {
-          if (temperatureDiff > 10) {
-            // It's hotter than normal
-            preparePostContent("weather",
-              "OMG ..It's so hot in here!!", 
-              [], // friend
-              null, // place
-              null // event
-            );
+            // Random between temperature & quote
+            if(getRandomNumberBetween(0,1) == 1){
+                // Get quote
+                getRandomQuote(function(result) {
+                    preparePostContent("weather",
+                        result,
+                        null, // friend
+                        null, // place
+                        null // event
+                    );
+                });
+            }
+            else{
+                // Get weather
+              if (temperatureDiff > 10) {
+                // It's hotter than normal
+                preparePostContent("weather",
+                  "OMG ..It's so hot in here!!",
+                  null, // friend
+                  null, // place
+                  null // event
+                );
 
-          } else if (temperatureDiff < -10) {
-            // It's cooler than normal
-            preparePostContent("weather",
-              "Crazy weather, I'm freezing now!", 
-              [], // friend
-              null, // place
-              null // event
-            );
-          } else {
-            preparePostContent("weather", "bahhh boring weather.. same old!!", 
-            	[], // friend
-              null, // place
-              null // event
-            );
-          }
+              } else if (temperatureDiff < -10) {
+                // It's cooler than normal
+                preparePostContent("weather",
+                  "Crazy weather, I'm freezing now!",
+                  null, // friend
+                  null, // place
+                  null // event
+                );
+              } else {
+                preparePostContent("weather", "Boring weather.. same old!!",
+                  null, // friend
+                  null, // place
+                  null // event
+                );
+              }
+            }
         });
 
         /*** Point of interest ***/
@@ -219,47 +247,47 @@ function generateStatusMessage() {
             preparePostContent(
               "location",
               "I'm here! " + pointOfInterest.name, // message
-              [], // friend
-              null, // place
+              null, // friend
+              pointOfInterest.id, // place
               null // event
             );
 
             /*var status = searchStatusContainingPointOfInterest(pointOfInterest.name);
-						if (isLessThan5HourAgo(status)) {
-							// No use case for this.
-							// ** do nothing **
-						} else {
-							// Check in here!
-							preparePostContent("I'm here! "+pointOfInterest.name);
-						}*/
+            if (isLessThan5HourAgo(status)) {
+              // No use case for this.
+              // ** do nothing **
+            } else {
+              // Check in here!
+              preparePostContent("I'm here! "+pointOfInterest.name);
+            }*/
           }
         });
 
         /*** Random News ***/
 
-        getRandomNews(function (quoteResult) {
-          if (quoteResult) {
-            // I'm closed to somewhere. So, have I posted about it recently?
-            preparePostContent(
-              "quote",
-              quoteResult, [], // friend
-              null, // place
-              null // event
-            );
-          }
+        getRandomNews(function (result) {
+          // Random news
+          preparePostContent(
+            "quote",
+            result, // message
+            null, // friend
+            null, // place
+            null // event
+          );
         });
 
       }); // end callback of getCurrentLocation()
 
     }); // end decision tree
-
-  
-
+$.mobile.hidePageLoadingMsg();
 }
 
 // Event handler for POST Button
 //
 function postButtonClick(type) {
+    $('#feedback').css("color","rgb(59, 89, 152)")
+
+    $('#feedback').html("Posting..")
 
     postFBStatus(prepared_message[type], prepared_friends[type], prepared_place[type], prepared_event[type]);
     generateStatusMessage();
