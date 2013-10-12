@@ -58,20 +58,40 @@ function postFBStatus(message, friends, place, myEvent) {
 // to prepare content, wait for user to post
 //
 function preparePostContent(type, message, friends, place, myEvent) {
-    prepared_message[type] = message;
-    prepared_friends[type] = friends;
-    prepared_place[type] = place;
-    prepared_event[type] = myEvent;
+  prepared_message[type] = message;
+  prepared_friends[type] = friends;
+  prepared_place[type] = place;
+  prepared_event[type] = myEvent;
 
-    if (type == "event")
-        $("#messageEvent").html(message);
-    if (type == "weather")
-        $("#messageWeather").html(message);
-    if (type == "location")
-        $("#messageLocation").html(message);
-    if (type == "quote")
-        $("#messageQuote").html(message); // $("#friends..")
-    $("#postButton").removeAttr("disabled");
+  if (type == "event") {
+    $("#messageEvent").html(message);
+    if (friends) {
+	    var friendsName = [];
+	    for (i=0; i < friends.length; i++) {
+	    	// Maximum 5 friends name to display
+	    	if (i == 5) {
+	    		friendsName.push("and "+(friends.length-i)+" more");
+	    		break;
+	    	} else {
+	    		friendsName.push(friends[i].name);
+	    	}
+	    }
+	  	$("#messageEvent").append("<br><small>with friend(s): <span style='color:#336699'></span></small>");
+	  	$("#messageEvent small span").html(friendsName.join());
+	  }
+  }
+  if (type == "weather") {
+    $("#messageWeather").html(message);
+  }
+  if (type == "location") {
+    $("#messageLocation").html(message);
+  }
+  if (type == "quote") {
+    $("#messageQuote").html(message); // $("#friends..")
+  }
+
+  // Enable Post button
+  $("#postButton").removeAttr("disabled");
 }
 
 // The heart of our app! Decision tree!!

@@ -238,8 +238,8 @@ function getAttendingEventAndFriends(response) {
     // Search for your friend and add him to the results
     for (var j = 0; j < response.friends.data.length; j++) {
       if (attendeesHash[response.friends.data[j].id] == true) {
-        // :: Append friend to result ::
-        results.friends.push(response.friends.data[j].id);
+        // :: Append friend object to result ::
+        results.friends.push(response.friends.data[j]);
       }
     }
   }
