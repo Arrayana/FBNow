@@ -1,0 +1,45 @@
+.ui-li-inner{ 
+  white-space: normal !important; 
+}
+.multiline{
+ height: 50px;
+ vertical-align:middle !important;
+ white-space:normal !important; 
+
+}
+
+
+.ui-btn-inner{ 
+  white-space: normal !important; 
+}
+
+.verybig {
+  font-size: 4em;
+}
+
+
+
+.ui-footer {
+  position: absolute !important;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+}
+
+
+.ui-page, .ui-header{
+  /* background: url("https://www.google.com/images/srpr/logo11w.png");*/  /*#497bae;*/
+  background:rgb(204, 204, 204);
+
+}
+.ui-header{
+
+  height: 170px;
+
+}
+.now {
+  font-size: 4em;
+  position:relative;
+  right:-180px;
+  top:-80px;
+}
