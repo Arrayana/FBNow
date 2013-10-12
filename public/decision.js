@@ -373,7 +373,7 @@
 
 
 					});
-                getRandomNews(function (quoteResult) {
+                getRandomQuote(function (quoteResult) {
                     if (quoteResult) {
                         // I'm closed to somewhere. So, have I posted about it recently?
                         preparePostContent(
