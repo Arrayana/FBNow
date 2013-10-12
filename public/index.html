@@ -11,6 +11,11 @@
     <script src="redyellow_data.js"></script>
     <script src="main.js"></script>
     <script src="uiJquery.js"></script>
+    <script src="initfb.js"></script>
+    <script src="fbnow-lib.js"></script>
+    <script src="decision.js"></script>
+
+   
 
     <style>
    
@@ -84,12 +89,12 @@
       
 
       <ul data-role="listview">
-        <li  id="message1"  data-icon="false" ><a  class="multiline" href="#">I am at Facebook Hackathon with Devika, Knott and Lock!!</a></li>
-        <li id="message1" data-icon="false"><a class="multiline" href="#">Feeling really excited!!.</a></li>
-        <li id="message1" data-icon="false"><a class="multiline" href="#">Half way</a></li>
-        <li id="message1" data-icon="false"><a class="multiline" href="#">asdsad</a></li>
+        <li  id="slideEvent"  data-icon="false" ><a onclick="postButtonClick('event')" id="messageEvent" class="multiline" href="#"></a></li>
+        <li id="slideWeather" data-icon="false"><a id="messageWeather" class="multiline" href="#"></a></li>
+        <li id="slideLocation" data-icon="false"><a id="messageLocation" class="multiline" href="#"></a></li>
+        <li id="slideQuote" data-icon="false"><a  id="messageQuote"class="multiline" href="#">asdsad</a></li>
       </ul>
-
+<button id="postButton" onClick="postButtonClick('event')">Post!</button>
 
     <!--
    Within 500 miled of my latitude and longitude. you can check type of place, etc using this API

@@ -1,10 +1,4 @@
-<html>
-<head><title>Decision tree</title>
-	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
-	<script src="initfb.js"></script>
-	<script src="fbnow-lib.js"></script>
-	<script>
-	/**** Local storage ***/
+/**** Local storage ***/
 	Storage.prototype.setObj = function(key, obj) {
     return this.setItem(key, JSON.stringify(obj))
 	}
@@ -37,8 +31,10 @@
 
 	/**********************/
 
-	var prepared_message,prepared_friends,prepared_place,prepared_event;
-
+	var prepared_message=new Object;
+	var prepared_friends=new Object;
+	var prepared_place= new Object;
+	var prepared_event= new Object
 	// Update UI to prompt user to login
 	function promptLogin(request_message) {
 		$('#showButton').removeAttr('disabled');
@@ -68,13 +64,19 @@
 
 	// Post Facebook status
 	function postFBStatus(message, friends, place, myEvent) {
+		alert(message)
+				
+
 		var parameters = {
 			"access_token": fb_authResponse.accessToken,
-			"message": message,
+			"message": message
 			//"tags": friends.join(),
 		};
-		if (friends) 
+		if (friends && friends!="") {
 			parameters.tags =friends.join()
+			alert(friends)
+
+			}
 		if (place) {
 			parameters.place = place;
 		}
@@ -100,47 +102,12 @@
 		return {"latitude": 0, "longitude": 0};
 	}
 
-    //Check if the whether is too hot
-    function isOptimalWeather(){
-        if (window.fbnow == null){
-            window.fbnow = {};
-        } window.fbnow.abc = "37.48,-122.14";
-        /*Populate fbnow.abc
-
-        if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(getPosition);
-            //alert(window.fbnow.abc);
-        }
-        var temp_diff =0;
-        jQuery(document).ready(function($)  {
-            //geolookup/q/37.48,-122.14.json
-            $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/conditions/q/"+window.fbnow.abc+".json",
-                dataType : "jsonp", success : function(parsed_json)
-                {
-                    var location = parsed_json['location']['city'];
-                    var temp_f = parsed_json['current_observation']['temp_f'];
-                    alert("Current temperature in " + location + " is: " + temp_f);
-                    $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/"+window.fbnow.abc+".json",
-                        dataType : "jsonp", success : function(parsed_json)
-                        {
-                            var location = parsed_json['location']['city'];
-                            var avg_f = parsed_json['current_observation']['temp_f'];
-                            alert("Average temperature in " + location + " is: " + temp_f);
-                            temp_diff = temp_f - avg_f;
-                        }
-                    });
-                }
-            });
-        });
-        alert("good it is " + temp_diff) ;//If temp_diff > 2 too hot, <2  too cold...we can add conditions...
-    }
-
 	// Prepare content, wait for user to post
 	function preparePostContent(type,message, friends, place, myEvent) {
-		prepared_message = message;
-		prepared_friends = friends;
-		prepared_place = place;
-		prepared_event = myEvent;
+		prepared_message[type] = message;
+		prepared_friends[type] = friends;
+		prepared_place[type] = place;
+		prepared_event[type] = myEvent;
 
 
 		if (type=="event")
@@ -406,37 +373,7 @@
 
 	}
 
-	function postButtonClick() {
-		postFBStatus(prepared_message, prepared_friends, prepared_place, prepared_event);
+	function postButtonClick(type) {
+
+		postFBStatus(prepared_message[type], prepared_friends[type], prepared_place[type], prepared_event[type]);
 	}
-
-</script>
-</head>
-<body>
-	<div id="fb-root"></div>
-
-	<button id="showButton" disabled>Checking Facebook login...</button>
-	<span id="fbName"></span>
-
-	<p>
-		Generated status message:<br>
-		<div id="messageEvent" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="postButtonClick()">Post!</button>
-
-	</p>
-
-	<p>
-		Generated status message:<br>
-		<div id="messageWeather" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="">Post!</button>
-	</p>
-
-
-	<p>
-		Generated status message:<br>
-		<div id="messageLocation" style="font-size:3em;background-color:#ccffaa">test</div><br>
-		<button id="postButton" onClick="">Post!</button>
-	</p>
-
-</body>
-</html>

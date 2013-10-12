@@ -7,12 +7,7 @@
 
     //$( event.target ).addClass( "swipeleft" );
   
-Storage.prototype.setObj = function(key, obj) {
-    return this.setItem(key, JSON.stringify(obj))
-}
-Storage.prototype.getObj = function(key) {
-    return JSON.parse(this.getItem(key))
-}
+
 	
 $(document).ready(function() {
 
@@ -37,6 +32,7 @@ localStorage.setObj('arx',array);
   // Callback function references the event target and adds the 'swipe' class to it
   function swipeHandler( event ){
    alert("ssss")
+   postButtonClick("event");
  }
 
  })
