@@ -163,42 +163,37 @@ function getRandomQuote(){
 }
 
 function getWeather(){
-    //TODO: Remove this
-    if (window.fbnow == null){
-        window.fbnow = {};
-    } window.fbnow.abc = "37.48,-122.14";
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(getPosition);
-        //alert(window.fbnow.abc);
-    }
-    var temp_diff =0;
-    jQuery(document).ready(function($)  {
-        //geolookup/q/37.48,-122.14.json
+  //TODO: Remove this
+  if (window.fbnow == null){
+    window.fbnow = {};
+  } window.fbnow.abc = "37.48,-122.14";
+
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(getPosition);
+    //alert(window.fbnow.abc);
+  }
+  var temp_diff =0;
+  jQuery(document).ready(function($)  {
+    //geolookup/q/37.48,-122.14.json
     $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/conditions/q/"+window.fbnow.abc+".json",
-        dataType : "jsonp", success : function(parsed_json)
-        {
+      dataType : "jsonp", success : function(parsed_json)
+      {
+        var location = parsed_json['location']['city'];
+        var temp_f = parsed_json['current_observation']['temp_f'];
+        alert("Current temperature in " + location + " is: " + temp_f);
+        $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/"+window.fbnow.abc+".json",
+          dataType : "jsonp", success : function(parsed_json)
+          {
             var location = parsed_json['location']['city'];
-            var temp_f = parsed_json['current_observation']['temp_f'];
-            alert("Current temperature in " + location + " is: " + temp_f);
-            $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/"+window.fbnow.abc+".json",
-                dataType : "jsonp", success : function(parsed_json)
-                {
-                    var location = parsed_json['location']['city'];
-                    var avg_f = parsed_json['current_observation']['temp_f'];
-                    alert("Average temperature in " + location + " is: " + temp_f);
-                    temp_diff = temp_f - avg_f;
-                }
-            });
-
-        }
-
+            var avg_f = parsed_json['current_observation']['temp_f'];
+            alert("Average temperature in " + location + " is: " + temp_f);
+            temp_diff = temp_f - avg_f;
+          }
+        });
+      }
     });
-
-
-
-
-    });
-    alert("good it is " + temp_diff) ;//If temp_diff > 2 too hot, <2  too cold...we can add conditions...
+  });
+  alert("good it is " + temp_diff) ;//If temp_diff > 2 too hot, <2  too cold...we can add conditions...
 }
 
 function FBFetch() {
