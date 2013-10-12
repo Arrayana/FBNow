@@ -117,7 +117,8 @@
 		$("#messageWeather").html(message);
 		if (type=="location")
 		$("#messageLocation").html(message);
-		// $("#friends..")
+        if (type=="quote")
+        $("#messageQuote").html(message);// $("#friends..")
 		$("#postButton").removeAttr("disabled");
 	}
 
@@ -249,7 +250,6 @@
 				// Is there a happenning event that I'm suppose to be attending now?
 				// Results will be { "event": {..}, "friends": [..] }
 				var eventAndFriends = getAttendingEventAndFriends(response);
-				eventAndFriends.event = undefined; /*TEST*/
 				if (eventAndFriends.event != undefined) {
 					var myEvent = eventAndFriends.event;
 					var friendsInEvent = eventAndFriends.friends;
@@ -271,7 +271,7 @@
 							} else {
 								// More than 1 hour ago. Post the event progress!
 								var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-								("event",
+                                preparePostContent("event",
 									"I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent), // message
 									[], // friends (no friends to avoid disturbing them)
 									myEvent.venue.id, // place
@@ -303,7 +303,7 @@
 				} else {
 				// No happening event.
 						preparePostContent("event",
-							"Looking for events or passtimes. Any ideas?", // message
+							"Bored and looking for events. Any ideas?", // message
 							[], // no friend
 							null, // no place
 							null // no event
@@ -339,7 +339,8 @@
 							null // no event
 							);
 					} else {
-						preparePostContent("weather","bahhh boring weather.. same old!!", 
+						preparePostContent("weather",
+                            "bahhh boring weather.. same old!!",
 							[], // no friend
 							null, // no place
 							null // no event
@@ -352,7 +353,13 @@
 					getClosestPointOfInterest(currentLocation, function (pointOfInterest) {
 					if (pointOfInterest) {
 							// I'm closed to somewhere. So, have I posted about it recently?
-							preparePostContent("location","I'm here! "+pointOfInterest.name);
+							preparePostContent(
+                                "location",
+                                "I'm here! "+pointOfInterest.name,
+                                [], // friend
+                                null, // place
+                                null // event
+                                );
 
 							/*var status = searchStatusContainingPointOfInterest(pointOfInterest.name);
 							if (isLessThan5HourAgo(status)) {
@@ -362,11 +369,22 @@
 								// Check in here!
 								preparePostContent("I'm here! "+pointOfInterest.name);
 							}*/
-						}	
+						}
 
 
 					});
-						
+                getRandomQuote(function (quoteResult) {
+                    if (quoteResult) {
+                        // I'm closed to somewhere. So, have I posted about it recently?
+                        preparePostContent(
+                            "quote",
+                            quoteResult,
+                            [], // friend
+                            null, // place
+                            null // event
+                        );
+                    }
+                });
 
 			}); // end callback of getCurrentLocation()
 
@@ -378,3 +396,13 @@
 
 		postFBStatus(prepared_message[type], prepared_friends[type], prepared_place[type], prepared_event[type]);
 	}
+
+
+    function getRandomQuote(callback) {
+        $.ajax({ url : "http://api.theysaidso.com/qod.js?category=life", //http://www.iheartquotes.com/api/v1/random.json",
+            dataType : "jsonp", success : function(parsed_json)
+            {
+                callback(parsed_json['data']['contents']['quote']);
+            }
+        });
+    }
