@@ -139,3 +139,91 @@ function searchStatusContainingPlaceName(placeName, statuses, currentLocation){
 
   return foundPlace;
 }
+
+// http://stackoverflow.com/questions/2782976/convert-facebook-date-format-to-javascript-date
+function timeAgo(time){
+  var date = new Date((time || "").replace(/-/g,"/").replace(/[TZ]/g," ")),
+      diff = (((new Date()).getTime() - date.getTime()) / 1000),
+      day_diff = Math.floor(diff / 86400);
+
+  if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
+    return;
+
+  return day_diff == 0 && (
+        diff < 60 && "just now" ||
+        diff < 120 && "1 minute ago" ||
+        diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+        diff < 7200 && "1 hour ago" ||
+        diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
+        day_diff == 1 && "Yesterday" ||
+        day_diff < 7 && day_diff + " days ago" ||
+        day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
+}
+
+function isLessThan1HourAgo(status){
+   var prettyDate = timeAgo(status.updated_time);
+   console.log(prettyDate); 
+   return prettyDate == "1 hour ago" || 
+          prettyDate.indexOf('minute') > -1 ||
+          prettyDate.indexOf('just now') > -1 ;
+
+}
+
+function isLessThan5HourAgo(status){
+   var prettyDate = timeAgo(status.updated_time);
+   console.log(prettyDate); 
+   return prettyDate == "1 hour ago" || 
+          prettyDate == "2 hour ago" ||  
+          prettyDate == "3 hour ago" || 
+          prettyDate == "4 hour ago" || 
+          prettyDate == "5 hour ago" || 
+          prettyDate.indexOf('minute') > -1 ||
+          prettyDate.indexOf('just now') > -1 ;
+
+}
+
+
+// location = {}
+function getTemperatureDiff(currentLocation, callback){
+
+  // Current temperature
+  var urlstring = "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/conditions/q/" + 
+                  currentLocation.latitude.toFixed(8) + 
+                  "," +
+                  currentLocation.longitude.toFixed(8) +
+                  ".json";
+
+  // Avg temperature                
+  var urlstring2 = "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/" + 
+                  // currentLocation.latitude.toFixed(8) + 
+                  // "," +
+                  // currentLocation.longitude.toFixed(8) +
+                  '40.450343,-80.024464'+
+                  ".json"
+
+
+    //geolookup/q/37.48,-122.14.json
+    $.ajax({  url : urlstring,
+              dataType : "jsonp", 
+              success : function(parsed_json){
+                var location = parsed_json['location']['city'];
+                var temp_f = parsed_json['current_observation']['temp_f'];
+                console.log("Current temperature in " + location + " is: " + temp_f);
+                $.ajax({ url : urlstring2,
+                  dataType : "jsonp", 
+                  success : function(parsed_json){
+                    var location = parsed_json['location']['city'];
+                    var avg_f = parsed_json['current_observation']['temp_f'];
+                    console.log("Average temperature in " + location + " is: " + avg_f);
+                    temp_diff = temp_f - avg_f;
+
+                    // Callback
+                    callback(temp_diff);
+                  }
+                });
+              }
+    });
+
+
+
+}
