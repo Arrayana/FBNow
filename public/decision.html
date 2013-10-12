@@ -2,6 +2,7 @@
 <head><title>Decision tree</title>
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="initfb.js"></script>
+	<script src="fbnow-lib.js"></script>
 	<script>
 	/**** Local storage ***/
 	Storage.prototype.setObj = function(key, obj) {
@@ -222,10 +223,6 @@
 		return 65;
 	}
 
-	function getClosestPointOfInterest(p) {
-		return { "name": "Fuki Sushi" };
-	}
-
 	function getMessageTimeSpentPercent(timeSpentPercent) {
 		if (timeSpentPercent<10)
 			return "Feeling excited!!.. just started"
@@ -244,19 +241,18 @@
 			getCurrentLocation(function(currentLocation) {
 				// Got everything we need. Proceed!
 				console.log("Got location!");
-
 				// Is there a happenning event that I'm suppose to be attending now?
 				// Results will be { "event": {..}, "friends": [..] }
 				var eventAndFriends = getAttendingEventAndFriends(response);
+				eventAndFriends.event = undefined; /*TEST*/
 				if (eventAndFriends.event != undefined) {
 					var myEvent = eventAndFriends.event;
 					var friendsInEvent = eventAndFriends.friends;
-					// alert(myEvent.name + " and "+ friendsInEvent.join()); return;
-					// postFBStatus("Yo! "+results.event.name, results.friends, 166793820034304);
-					// return;
 
 					// Yes. Am I close to that event's location?
-					if (isCloseToEachOther(currentLocation, myEvent.venue)) {
+					var isCloseToEvent = isCloseToEachOther(currentLocation, myEvent.venue);
+					// var isCloseToEvent = false; /*TEST*/
+					if (isCloseToEvent) {
 						// alert("I'm close to "+myEvent.name); return;
 
 						// Yes. Have I posted a status about this event earlier?
@@ -270,7 +266,7 @@
 							} else {
 								// More than 1 hour ago. Post the event progress!
 								var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-								preparePostContent("event",
+								("event",
 									"I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent), // message
 									[], // friends (no friends to avoid disturbing them)
 									myEvent.venue.id, // place
@@ -299,16 +295,26 @@
 							);
 						//return;
 					}
-				}
+				} else {
 				// No happening event.
+						preparePostContent("event",
+							"Nothing interesting in my life"+" T_T", // message
+							[], // no friend
+							null, // no place
+							null // no event
+							);
+
+				}
+
 				// Or just posted about that event recently (< 1hr)
 				// Come to this logic!
 
+
 				
 				
 
-					var averageDegree = getNormalTemperatureNow(getCurrentLocation());
-					var currentDegree = getCurrentTemperatureNow(getCurrentLocation());
+					var averageDegree = getNormalTemperatureNow(currentLocation);
+					var currentDegree = getCurrentTemperatureNow(currentLocation);
 
 					if (currentDegree - averageDegree > 10) {
 						// It's hotter than normal
@@ -336,10 +342,12 @@
 					}
 
 
-					var pointOfInterest = getClosestPointOfInterest(getCurrentLocation());
-						if (pointOfInterest) {
+				//	var pointOfInterest = getClosestPointOfInterest(currentLocation, function () {});
+
+					getClosestPointOfInterest(currentLocation, function (pointOfInterest) {
+					if (pointOfInterest) {
 							// I'm closed to somewhere. So, have I posted about it recently?
-							preparePostContent("I'm here! "+pointOfInterest.name);
+							preparePostContent("location","I'm here! "+pointOfInterest.name);
 
 							/*var status = searchStatusContainingPointOfInterest(pointOfInterest.name);
 							if (isLessThan5HourAgo(status)) {
@@ -350,6 +358,10 @@
 								preparePostContent("I'm here! "+pointOfInterest.name);
 							}*/
 						}	
+
+
+					});
+						
 
 			}); // end callback of getCurrentLocation()
 
@@ -373,6 +385,7 @@
 		Generated status message:<br>
 		<div id="messageEvent" style="font-size:3em;background-color:#ccffaa">test</div><br>
 		<button id="postButton" onClick="postButtonClick()">Post!</button>
+
 	</p>
 
 	<p>
