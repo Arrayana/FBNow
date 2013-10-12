@@ -89,7 +89,16 @@
 		return { "name": "Fuki Sushi" };
 	}
 
-	function generateStatusMessage() {
+	function getMessageTimeSpentPercent(timeSpentPercent) {
+		if (timeSpentPercent<10)
+			return "Feeling excited!!.. just started"
+		if (40<timeSpentPercent && timeSpentPercent<60)
+			return "Lets keep rolling..just half way done!!!"
+		if (90<timeSpentPercent)
+			return  "Almost done!.."
+	}
+
+ 	function generateStatusMessage() {
 		// Get an object from FB.api about everything I need
 		FB.api('/me?fields=name', function(response) {
 			console.log(response.name);
@@ -109,7 +118,7 @@
 						} else {
 							// More than 1 hour ago. Post the event progress!
 							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-							showGeneratedMessage("I am still at "+myEvent.name+". "+timeSpentPercent+"%");
+							showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
 							return;
 						}
 					} else {
@@ -135,10 +144,10 @@
 				var currentDegree = getCurrentTemperatureNow(getLocation());
 				if (currentDegree - averageDegree > 10) {
 					// It's hotter than normal
-					showGeneratedMessage("It's so hot!!");
+					showGeneratedMessage("OMG ..It's so hot in here!!");
 				} else if (currentDegree - averageDegree < -10) {
 					// It's cooler than normal
-					showGeneratedMessage("It's so cold!!");
+					showGeneratedMessage("Crazy weather, I am freezing now!!");
 				} else {
 					// Temperature is normal. Am I close to any point of interest? Find one.
 					var pointOfInterest = getClosestPointOfInterest(getLocation());
