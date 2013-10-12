@@ -36,8 +36,8 @@ function postFBStatus(message, friends, place, myEvent) {
   };
   // Tag friends if friends are provided
   if (friends && friends != "") {
-    parameters.tags = friends.join()
-    // alert(friends)
+    parameters.tags = friends.join();
+    alert("Also tag these guys: "+friends.join());
   }
   // Tag place if place is provided
   if (place) {
@@ -75,17 +75,22 @@ function preparePostContent(type, message, friends, place, myEvent) {
   $("#postButton").removeAttr("disabled");
 }
 
-// The heart!
+// The heart of our app! Decision tree!!
+var fieldsNeeded = "name,events.fields(name,venue,attending.fields(id),end_time,start_time),friends.fields(id,name)";
 //
 function generateStatusMessage() {
+	
+	console.log("Getting data from Graph API..");
   // Get an object from FB.api about everything I need
-  FB.api('/me?fields=name,events.fields(name,venue,attending.fields(id),end_time,start_time),friends.fields(id,name)',
-    function (response) {
+  FB.api('/me?fields='+fieldsNeeded, function (response) {
       console.log("Got response from Graph API! " + response.name);
+      console.log("Getting current location..");
+
       // Also need to wait for location.
       getCurrentLocation(function (currentLocation) {
         // Got everything we need. Proceed!
-        console.log("Got location!");
+        console.log("Got current location!");
+
         // Is there a happenning event that I'm suppose to be attending now?
         // Results will be { "event": {..}, "friends": [..] }
         var eventAndFriends = getAttendingEventAndFriends(response);
@@ -108,7 +113,7 @@ function generateStatusMessage() {
               } else {
                 // More than 1 hour ago. Post the event progress!
                 var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-                preparePostContent("event",
+                preparePostContent("event", // content type
                   "I am still at " + myEvent.name + ". " + getMessageTimeSpentPercent(timeSpentPercent), // message
                   [], // friends (no friends to avoid disturbing them)
                   myEvent.venue.id, // place
@@ -131,9 +136,9 @@ function generateStatusMessage() {
             // I'm not close to that event. I must have missed it!
             preparePostContent("event",
               "I missed " + myEvent.name + " T_T", // message
-              [], // no friend
-              null, // no place
-              null // no event
+              [], // friend
+              null, // place
+              null // event
             );
             //return;
           }
@@ -141,9 +146,9 @@ function generateStatusMessage() {
           // No happening event.
           preparePostContent("event",
             "Bored and looking for events. Any ideas?", // message
-            [], // no friend
-            null, // no place
-            null // no event
+            [], // friend
+            null, // place
+            null // event
           );
 
         }
@@ -154,22 +159,25 @@ function generateStatusMessage() {
           if (temperatureDiff > 10) {
             // It's hotter than normal
             preparePostContent("weather",
-              "OMG ..It's so hot in here!!", [], // no friend
-              null, // no place
-              null // no event
+              "OMG ..It's so hot in here!!", 
+              [], // friend
+              null, // place
+              null // event
             );
 
           } else if (temperatureDiff < -10) {
             // It's cooler than normal
             preparePostContent("weather",
-              "Crazy weather, I'm freezing now!", [], // no friend
-              null, // no place
-              null // no event
+              "Crazy weather, I'm freezing now!", 
+              [], // friend
+              null, // place
+              null // event
             );
           } else {
-            preparePostContent("weather", "bahhh boring weather.. same old!!", [], // no friend
-              null, // no place
-              null // no event
+            preparePostContent("weather", "bahhh boring weather.. same old!!", 
+            	[], // friend
+              null, // place
+              null // event
             );
           }
         });
@@ -181,7 +189,8 @@ function generateStatusMessage() {
             // I'm closed to somewhere. So, have I posted about it recently?
             preparePostContent(
               "location",
-              "I'm here! " + pointOfInterest.name, [], // friend
+              "I'm here! " + pointOfInterest.name, // message
+              [], // friend
               null, // place
               null // event
             );
@@ -218,7 +227,7 @@ function generateStatusMessage() {
 }
 
 // Event handler for POST Button
-
+//
 function postButtonClick(type) {
   postFBStatus(prepared_message[type], prepared_friends[type], prepared_place[type], prepared_event[type]);
 }
