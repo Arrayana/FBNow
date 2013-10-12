@@ -318,6 +318,7 @@ function getRandomNews(callback) {
         $.mobile.hidePageLoadingMsg()
 
       } catch (err) {
+        callback('');
         console.log("Error getting news: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
       }
     }
@@ -336,6 +337,13 @@ function getRandomQuote(callback) {
         dataType: 'jsonp',
         format: 'json',
         jsonp: 'jsonp',
-        success: function(parsed_json) { callback(parsed_json['quoteText']) }
-});
+        success: function(parsed_json) {
+          try {
+            callback(parsed_json['quoteText']) 
+          } catch (err) {
+            callback('');
+            console.log("Error getting quote: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
+          }
+        }
+    });
 }

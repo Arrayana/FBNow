@@ -248,17 +248,15 @@ function generateStatusMessage() {
 
         /*** Random News ***/
 
-        getRandomNews(function (quoteResult) {
-          if (quoteResult) {
-            // I'm closed to somewhere. So, have I posted about it recently?
-            preparePostContent(
-              "quote",
-              quoteResult, // message
-              null, // friend
-              null, // place
-              null // event
-            );
-          }
+        getRandomNews(function (result) {
+          // Random news
+          preparePostContent(
+            "quote",
+            result, // message
+            null, // friend
+            null, // place
+            null // event
+          );
         });
 
       }); // end callback of getCurrentLocation()
