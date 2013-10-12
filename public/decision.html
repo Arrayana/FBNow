@@ -75,7 +75,16 @@
 		return { "name": "Fuki Sushi" };
 	}
 
-	function generateStatusMessage() {
+	function getMessageTimeSpentPercent(timeSpentPercent) {
+		if (timeSpentPercent<10)
+			return "Feeling excited!!.. just started"
+		if (40<timeSpentPercent && timeSpentPercent<60)
+			return "Lets keep rolling..just half way done"
+		if (90<timeSpentPercent)
+			return  "Almost done!.."
+	}
+
+ 	function generateStatusMessage() {
 		// Get an object from FB.api about everything I need
 		FB.api('/me?fields=name', function(response) {
 			console.log(response.name);
@@ -95,7 +104,7 @@
 						} else {
 							// More than 1 hour ago. Post the event progress!
 							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-							showGeneratedMessage("I am still at "+myEvent.name+". "+timeSpentPercent+"%");
+							showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
 							return;
 						}
 					} else {
