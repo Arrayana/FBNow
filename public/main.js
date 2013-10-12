@@ -9,7 +9,7 @@ $(document).ready(function() {
     window.fbAsyncInit = function() {
       // init the FB JS SDK
       FB.init({
-          appId      : '440731572690658',                        // App ID from the app dashboard
+          appId      : '534972969913512',                        // App ID from the app dashboard
           channelUrl : '//redyellowdetector.herokuapp.com/channel.html', // Channel file for x-domain comms
           status     : true,                                 // Check Facebook Login status
           xfbml      : true                                  // Look for social plugins on the page
