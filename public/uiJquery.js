@@ -12,6 +12,7 @@
 $(document).ready(function() {
 
 
+  $.mobile.showPageLoadingMsg();
 
   	$( "#swipeEvent" ).on( "swipe", swipeEventHandler );
    
@@ -41,5 +42,6 @@ $(document).ready(function() {
     function swipeQuoteHandler( event ){
       postButtonClick('quote') 
     }
+
 
 })

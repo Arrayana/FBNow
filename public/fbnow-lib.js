@@ -315,6 +315,8 @@ function getRandomNews(callback) {
       try {
         var randomOrder = getRandomNumberBetween(0,10);
         callback(parsed_json['feed'][randomOrder]['headline']);
+        $.mobile.hidePageLoadingMsg()
+
       } catch (err) {
         console.log("Error getting news: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
       }

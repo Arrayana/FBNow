@@ -69,7 +69,7 @@ function preparePostContent(type, message, friends, place, myEvent) {
 
   if (type == "event") {
     $("#messageEvent").html(message);
-    if (friends) {
+    if (friends && friends.length>0) {
 	    var friendsName = [];
 	    for (i=0; i < friends.length; i++) {
 	    	// Maximum 5 friends name to display
@@ -248,7 +248,7 @@ function generateStatusMessage() {
       }); // end callback of getCurrentLocation()
 
     }); // end decision tree
-
+$.mobile.hidePageLoadingMsg();
 }
 
 // Event handler for POST Button
