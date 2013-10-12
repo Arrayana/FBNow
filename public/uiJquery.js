@@ -8,4 +8,13 @@
     //$( event.target ).addClass( "swipeleft" );
   
 
+$(document).ready(function() {
+
+	$( "#message1" ).on( "swipe", swipeHandler );
  
+  // Callback function references the event target and adds the 'swipe' class to it
+  function swipeHandler( event ){
+   alert("ssss")
+ }
+
+ })
