@@ -1,8 +1,26 @@
 <html>
 <head><title>Decision tree</title>
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
-<script src="main.js"></script>
+<script src="initfb.js"></script>
 <script>
+	// Update UI to prompt user to login
+	function promptLogin(request_message) {
+		$('#showButton').removeAttr('disabled');
+		$('#showButton').html(request_message);
+		$('#showButton').off('click'); // remove previous click handler
+		$('#showButton').click(clickToLoginHandler);
+	}
+
+	// Update UI to say it's ready to go!
+	function promptStart() {
+		// Sample call: Show name
+		FB.api('/me?fields=name', function(response) {
+			$('#showButton').html('Hello '+response.name+'!');
+		});
+
+		generateStatusMessage();
+	}
+
 	function getLocation() {
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(function(position) {
@@ -11,6 +29,10 @@
 		} else {
 			return;
 		}
+	}
+
+	function getMyHomeLocation() {
+		return {};
 	}
 
 	function showGeneratedMessage(message) {
@@ -26,7 +48,7 @@
 	}
 
 	function searchStatusContainingPlaceName(n) {
-		return true;
+		return {};
 	}
 
 	function isLessThan1HourAgo(s) {
@@ -34,7 +56,7 @@
 	}
 
 	function isLessThan5HourAgo(s) {
-		return true;
+		return false;
 	}
 
 	function getEventTimeSpentPercent(e) {
@@ -90,7 +112,7 @@
 			// No happening event.
 			// Or just posted about that event recently (< 1hr)
 			// Come to this logic!
-			if (isCloseToHome(getLocation(), myHomeLocation)) {
+			if (isCloseTo(getLocation(), getMyHomeLocation())) {
 				// We're not gonna demo this use case. Skip it!
 				// ** do nothing **
 			} else {
@@ -126,16 +148,17 @@
 
 	}
 
-	$(function() {
-		generateStatusMessage();
-	});
-
 </script>
 </head>
 <body>
 	<div id="fb-root"></div>
 
-	Generated status message<br>
-	<div id="message"></div>
+	<button id="showButton" disabled>Checking Facebook login...</button>
+	<span id="fbName"></span>
+
+	<p>
+		Generated status message:<br>
+		<div id="message" style="font-size:3em;background-color:#ccffaa"></div>
+	</p>
 </body>
 </html>
