@@ -194,6 +194,10 @@
 
 	}
 
+	function postButtonClick() {
+		postFBStatus($('#message').html(), [609025954,543721930], 132738745815);
+	}
+
 </script>
 </head>
 <body>
@@ -205,7 +209,7 @@
 	<p>
 		Generated status message:<br>
 		<div id="message" style="font-size:3em;background-color:#ccffaa"></div><br>
-		<button id="postButton" onClick="postFBStatus($('#message').html(), [609025954,543721930], 132738745815)" disabled>Post!</button>
+		<button id="postButton" onClick="postButtonClick()" disabled>Post!</button>
 	</p>
 </body>
 </html>

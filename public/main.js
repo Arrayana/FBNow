@@ -1,3 +1,4 @@
+var abc = "hello";
 var fb_me;
 var fb_authResponse; // .uid .accessToken
 var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events';
@@ -5,6 +6,9 @@ var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists
 // Call this when the page has loaded
 $(document).ready(function() {
   console.log('Initializing FB SDK. Requesting permissions: '+required_permissions);
+
+  console.log('Initializing FB now global variable...');
+  if(window.fbnow == null) window.fbnow = {};
 
   $.ajaxSetup({ cache: true });
   $.getScript('//connect.facebook.net/en_UK/all.js', function(){
@@ -31,22 +35,37 @@ $(document).ready(function() {
   });
 });
 
-/* --- Location functions --- */
-function getLocation()
-{
+/***Location functions
+*/
+function getLocation(){
   var x=document.getElementById("demo");
-  if (navigator.geolocation)
-  {
+  if (navigator.geolocation){
+    // Async function, no return via return
     navigator.geolocation.getCurrentPosition(showPosition);
   }
-  else{x.innerHTML="Geolocation is not supported by this browser.";}
+  else{
+    x.innerHTML="Geolocation is not supported by this browser.";
+  }
 }
-function showPosition(position)
-{
+
+function showPosition(position){
   var x=document.getElementById("demo");
   x.innerHTML="Latitude: " + position.coords.latitude +
   "<br>Longitude: " + position.coords.longitude;
+
+  // Set as global variable
+  window.fbnow['current_location'] = {'latitude': position.coords.latitude, 
+                                      'longitude': position.coords.longitude }
+  
 }
+function getPosition(position)
+{
+   if (window.fbnow == null){
+      window.fbnow = {};
+   }
+    window.fbnow.abc = position.coords.latitude + "," + position.coords.longitude;
+}
+
 
 /* ------------ Click handlers --------------- */
 
@@ -127,13 +146,70 @@ function promptStart() {
   $("#showButton").click(clickToStartHandler);
 }
 
+function getRandomQuote(){
+
+    //http://www.iheartquotes.com/api/v1/random.json
+    jQuery(document).ready(function($)  {
+        //geolookup/q/37.48,-122.14.json
+        $.ajax({ url : "http://api.theysaidso.com/qod.js?category=life", //http://www.iheartquotes.com/api/v1/random.json",
+            dataType : "jsonp", success : function(parsed_json)
+            {
+                $('#quote').append(parsed_json['data']);
+                alert(parsed_json['data']['contents']['quote']);
+            }
+
+        });
+
+    });
+}
+
+function getWeather(){
+    //TODO: Remove this
+    if (window.fbnow == null){
+        window.fbnow = {};
+    } window.fbnow.abc = "37.48,-122.14";
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(getPosition);
+        //alert(window.fbnow.abc);
+    }
+    var temp_diff =0;
+    jQuery(document).ready(function($)  {
+        //geolookup/q/37.48,-122.14.json
+    $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/conditions/q/"+window.fbnow.abc+".json",
+        dataType : "jsonp", success : function(parsed_json)
+        {
+            var location = parsed_json['location']['city'];
+            var temp_f = parsed_json['current_observation']['temp_f'];
+            alert("Current temperature in " + location + " is: " + temp_f);
+            $.ajax({ url : "http://api.wunderground.com/api/dd8a92c2da3add01/geolookup/almanac/conditions/q/"+window.fbnow.abc+".json",
+                dataType : "jsonp", success : function(parsed_json)
+                {
+                    var location = parsed_json['location']['city'];
+                    var avg_f = parsed_json['current_observation']['temp_f'];
+                    alert("Average temperature in " + location + " is: " + temp_f);
+                    temp_diff = temp_f - avg_f;
+                }
+            });
+
+        }
+
+    });
+
+
+
+
+    });
+    alert("good it is " + temp_diff) ;//If temp_diff > 2 too hot, <2  too cold...we can add conditions...
+}
+
 function FBFetch() {
     $('#events').html('Processing..');
 
-    FB.api('/me?fields=events,statuses.limit(10)', function(response) {
+    FB.api('/me?fields=events,friends,statuses.limit(10)', function(response) {
         $('#events').html('');
 
         fb_response = response;
+        friendslist = response.friends;
 
         var current_events=0,all_events=0;
         var currentdate = new Date();
@@ -157,6 +233,20 @@ function FBFetch() {
                 if(response.events.data[i].end_time>datetime && response.events.data[i].start_time <datetime)
                 {
                     $('#events').append(response.events.data[i].name + " in progress\n");
+                    $('#events').append(response.events.data[i].id + " in progress\n");
+                    FB.api('/'+response.events.data[i].id+"?fields=attending", function(responseinner) {
+                        fb_responseinner = responseinner;
+                        //friendslist = response.friends;
+                        $('#events').append(" " + responseinner.attending.data.length + "attending the event with you\n");
+                        for (var j=0; j<responseinner.attending.data.length; j++) {
+                            //Everyone attending = $('#events').append(responseinner.attending.data[j].id + " ");
+                            for(var k=0;k<response.friends.data.length;k++){
+                                if(response.friends.data[k].id == responseinner.attending.data[j].id){
+                                    $('#events').append(" " + responseinner.attending.data[j].name);
+                                }
+                            }
+                        }
+                    });
                 }
             }
             //If only the date is relevant, check that date is the same
@@ -176,7 +266,32 @@ function start() {
   $('#showButton').attr('disabled','disabled');
   $('#results').html('Processing..');
 
-  FB.api('/me?fields=likes,subscribedto', function(response) {
+  FB.api('/me?fields=likes,subscribedto,feed', function(response) {
+
+    var eventList = [
+      {
+        "name": "Lekkiko & Monkeyz wedding party!!", 
+        "location": "Veravian Resort", 
+        "id": "548939438509329", 
+        "start_time": "2013-11-09T17:00:00+0700"
+      }, 
+      {
+        "name": "Pao's Farewell Party", 
+        "location": "New Krung Thai Restaurant", 
+        "id": "555355841184544", 
+        "start_time": "2013-10-11T19:30:00-0700"
+      }, 
+      {
+        "name": "Facebook NorCal Regional Hackathon", 
+        "location": "Facebook HQ", 
+        "id": "152339121642221", 
+        "start_time": "2013-10-11T17:00:00-0700"
+      }
+    ];
+
+    console.log(isCloseToTheEvent(window.fbnow.current_location, eventList));
+
+
     $('#results').html('');
 
     fb_response = response;
