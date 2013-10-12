@@ -1,0 +1,173 @@
+<html>
+<head><title>Decision tree</title>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="initfb.js"></script>
+<script>
+	// Update UI to prompt user to login
+	function promptLogin(request_message) {
+		$('#showButton').removeAttr('disabled');
+		$('#showButton').html(request_message);
+		$('#showButton').off('click'); // remove previous click handler
+		$('#showButton').click(clickToLoginHandler);
+	}
+
+	// Update UI to say it's ready to go!
+	function promptStart() {
+		// Sample call: Show name
+		FB.api('/me?fields=name', function(response) {
+			$('#showButton').html('Hello '+response.name+'!');
+		});
+
+		generateStatusMessage();
+	}
+
+	function getLocation() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(function(position) {
+				return { "latitude": position.coords.latitude, "longitude": position.coords.longitude }
+			});
+		} else {
+			return;
+		}
+	}
+
+	function getMyHomeLocation() {
+		return {};
+	}
+
+	function showGeneratedMessage(message) {
+		$("#message").html(message);
+	}
+
+	function getAttendingEvent(r) {
+		return { "name": "hackathon", "location": "fb hq" };
+	}
+
+	function isCloseTo(a, b) {
+		return true;
+	}
+
+	function searchStatusContainingPlaceName(n) {
+		return {};
+	}
+
+	function isLessThan1HourAgo(s) {
+		return false;
+	}
+
+	function isLessThan5HourAgo(s) {
+		return false;
+	}
+
+	function getEventTimeSpentPercent(e) {
+		return 50;
+	}
+
+	function getNormalTemperatureNow(p) {
+		return 70;
+	}
+
+	function getCurrentTemperatureNow(p) {
+		return 65;
+	}
+
+	function getClosestPointOfInterest(p) {
+		return { "name": "Fuki Sushi" };
+	}
+
+	function getMessageTimeSpentPercent(timeSpentPercent) {
+		if (timeSpentPercent<10)
+			return "Feeling excited!!.. just started"
+		if (40<timeSpentPercent && timeSpentPercent<60)
+			return "Lets keep rolling..just half way done!!!"
+		if (90<timeSpentPercent)
+			return  "Almost done!.."
+	}
+
+ 	function generateStatusMessage() {
+		// Get an object from FB.api about everything I need
+		FB.api('/me?fields=name', function(response) {
+			console.log(response.name);
+
+			// Is there a happenning event that I'm suppose to be attending now?
+			var myEvent = getAttendingEvent(response);
+			if (myEvent) {
+				// Yes. Am I close to that event's location?
+				if (isCloseTo(getLocation(), myEvent.location)) {
+					// Yes.  Have I posted a status about this event earlier?
+					var status = searchStatusContainingPlaceName(myEvent.name);
+					if (status) {
+						// Has he posted about it recently (1hr) ?
+						if (isLessThan1HourAgo(status)) {
+							// Get out of this logic
+							// ** do nothing and proceed to next logic **
+						} else {
+							// More than 1 hour ago. Post the event progress!
+							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
+							showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
+							return;
+						}
+					} else {
+						// No status about the event yet. Post a status about this event!
+						showGeneratedMessage("I am at "+myEvent.name+"!");
+						return;
+					}
+				} else {
+					// I'm not close to that event. I must have missed it!
+					showGeneratedMessage("I missed "+myEvent.name+" T_T");
+					return;
+				}
+			}
+			// No happening event.
+			// Or just posted about that event recently (< 1hr)
+			// Come to this logic!
+			if (isCloseTo(getLocation(), getMyHomeLocation())) {
+				// We're not gonna demo this use case. Skip it!
+				// ** do nothing **
+			} else {
+				// I'm not at home. Check the weather
+				var averageDegree = getNormalTemperatureNow(getLocation());
+				var currentDegree = getCurrentTemperatureNow(getLocation());
+				if (currentDegree - averageDegree > 10) {
+					// It's hotter than normal
+					showGeneratedMessage("OMG ..It's so hot in here!!");
+				} else if (currentDegree - averageDegree < -10) {
+					// It's cooler than normal
+					showGeneratedMessage("Crazy weather, I am freezing now!!");
+				} else {
+					// Temperature is normal. Am I close to any point of interest? Find one.
+					var pointOfInterest = getClosestPointOfInterest(getLocation());
+					if (pointOfInterest) {
+						// I'm closed to somewhere. So, have I posted about it recently?
+						var status = searchStatusContainingPlaceName(pointOfInterest.name);
+						if (isLessThan5HourAgo(status)) {
+							// No use case for this.
+							// ** do nothing **
+						} else {
+							// Check in here!
+							showGeneratedMessage("I'm here! "+pointOfInterest.name);
+						}
+					} else {
+						// We're not gonna demo this use case.
+						// ** do nothing **
+					}
+				}
+			}
+		}); // end decision tree
+
+	}
+
+</script>
+</head>
+<body>
+	<div id="fb-root"></div>
+
+	<button id="showButton" disabled>Checking Facebook login...</button>
+	<span id="fbName"></span>
+
+	<p>
+		Generated status message:<br>
+		<div id="message" style="font-size:3em;background-color:#ccffaa"></div>
+	</p>
+</body>
+</html>

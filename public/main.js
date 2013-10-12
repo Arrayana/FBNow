@@ -1,16 +1,21 @@
 var fb_me;
 var fb_authResponse; // .uid .accessToken
-var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream';
+var required_permissions = 'email,user_likes,user_subscriptions,read_friendlists,read_stream,user_events';
 
+// Call this when the page has loaded
 $(document).ready(function() {
-  console.log('ready!');
+  console.log('Initializing FB SDK. Requesting permissions: '+required_permissions);
+
+  console.log('Initializing FB now global variable...');
+  if(window.fbnow == null) window.fbnow = {};
+
   $.ajaxSetup({ cache: true });
   $.getScript('//connect.facebook.net/en_UK/all.js', function(){
     window.fbAsyncInit = function() {
       // init the FB JS SDK
       FB.init({
           appId      : '534972969913512',                        // App ID from the app dashboard
-          channelUrl : '//redyellowdetector.herokuapp.com/channel.html', // Channel file for x-domain comms
+          channelUrl : '//facebooknow.herokuapp.com/channel.html', // Channel file for x-domain comms
           status     : true,                                 // Check Facebook Login status
           xfbml      : true                                  // Look for social plugins on the page
         });
@@ -20,14 +25,9 @@ $(document).ready(function() {
       FB.Event.subscribe('auth.login', function(response) {
         // do something with response
         console.log("auth.login response changed. Probably the user has just logged in.");
-        // for (var key in response) {
-        //   console.log("auth.login: "+key+": "+response[key]);
-        // }
-        // for (var key in response.authResponse) {
-        //   console.log("authResponse: "+key+": "+response.authResponse[key]); 
-        // }
       });
 
+      // Check user's login status and granted permissions
       checkUser();
 
     };
@@ -52,21 +52,13 @@ function showPosition(position){
   x.innerHTML="Latitude: " + position.coords.latitude +
   "<br>Longitude: " + position.coords.longitude;
 
-  // Set global location
-  if (window.fbnow == null){
-    // Create a new object
-    window.fbnow = {};
-  }
-  
+  // Set as global variable
   window.fbnow['current_location'] = {'latitude': position.coords.latitude, 
                                       'longitude': position.coords.longitude }
   
 }
 
-
-
 /* ------------ Click handlers --------------- */
-
 
 function clickToLoginHandler() {
     $('#showButton').attr('disabled','disabled');
@@ -102,12 +94,13 @@ function checkUser() {
         for (var i=0; i<list.length; i++) {
           console.log("checking permission of "+list[i]);
           if (response.data[0][list[i]] === undefined) {
+            // At least one permission hasn't been granted yet!
             promptLogin("Click to grant us more required permissions");
             return;
           }
         }
 
-        // It will reach here if all permissions are granted.
+        // It will call this function if all permissions have been granted.
         promptStart();
       });
 
@@ -123,15 +116,17 @@ function checkUser() {
   });
 }
 
+// Update UI to prompt user to login
 function promptLogin(request_message) {
   $('#showButton').removeAttr('disabled');
   $('#showButton').html(request_message);
-  $('#showButton').off('click'); // remove previous handler
+  $('#showButton').off('click'); // remove previous click handler
   $('#showButton').click(clickToLoginHandler);
 }
 
+// Update UI to say it's ready to go!
 function promptStart() {
-  // Show name
+  // Sample call: Show name
   FB.api('/me?fields=name', function(response) {
     $('#fbName').html(response.name);
   });
@@ -142,7 +137,50 @@ function promptStart() {
   $("#showButton").click(clickToStartHandler);
 }
 
-/* ------------- Main functions --------------- */
+function FBFetch() {
+    $('#events').html('Processing..');
+
+    FB.api('/me?fields=events,statuses.limit(10)', function(response) {
+        $('#events').html('');
+
+        fb_response = response;
+
+        var current_events=0,all_events=0;
+        var currentdate = new Date();
+        var datetime = currentdate.getFullYear() + "-"
+            +(currentdate.getMonth()+1)+ "-"
+            + currentdate.getDate() + "T"
+            + currentdate.getHours() + ":"
+            + currentdate.getMinutes() + ":"
+            + currentdate.getSeconds() + -currentdate.getTimezoneOffset()/60 ;
+
+        // Likes
+        $('#events').append("I can only try to get event....");
+        $('#events').append("I can only try to get event....");
+        $('#events').append(response.events.data.length);
+
+        for (var i=0; i<response.events.data.length; i++) {
+            $('#events').append("\n"+i);
+            //When date and time are needed
+            if(response.events.data[i].end_time) {
+                $('#events').append(response.events.data[i].end_time);
+                if(response.events.data[i].end_time>datetime && response.events.data[i].start_time <datetime)
+                {
+                    $('#events').append(response.events.data[i].name + " in progress\n");
+                }
+            }
+            //If only the date is relevant, check that date is the same
+            else if(datetime.indexOf(response.events.data[i].start_time)!=-1 ) {
+                $('#events').append(response.events.data[i].name + " in progress\n");
+            }
+        }
+
+
+    });
+}
+
+
+/* ------- Main functions for Red-Yellow Detector ------- */
 
 function start() {
   $('#showButton').attr('disabled','disabled');
