@@ -1,8 +1,35 @@
 <html>
 <head><title>Decision tree</title>
-<script src="http://code.jquery.com/jquery-latest.min.js"></script>
-<script src="initfb.js"></script>
-<script>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="initfb.js"></script>
+	<script>
+	/**** Locationing ****/
+
+	var _radInKM = 1.0;
+
+	// Calculate the distance given two points
+	function rad(x) {return x*Math.PI/180;}
+	function distHaversine(p1, p2) {
+	  var R = 6371; // earth's mean radius in km
+	  var dLat  = rad(p2.latitude - p1.latitude);
+	  var dLong = rad(p2.longitude - p1.longitude);
+
+	  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+	  Math.cos(rad(p1.latitude)) * Math.cos(rad(p2.latitude)) * Math.sin(dLong/2) * Math.sin(dLong/2);
+	  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	  var d = R * c;
+
+	  return d.toFixed(3);
+	}
+
+	function isCloseToEachOther(location1, location2){
+		return distHaversine(location1, location2) < _radInKM;
+	};
+
+	/**********************/
+
+	var prepared_message,prepared_friends,prepared_place,prepared_event;
+
 	// Update UI to prompt user to login
 	function promptLogin(request_message) {
 		$('#showButton').removeAttr('disabled');
@@ -21,52 +48,148 @@
 		generateStatusMessage();
 	}
 
+	// Pad leading zero if needed
+	function pad(number, length) {
+		var str = '' + number;
+		while (str.length < length) {
+			str = '0' + str;
+		}
+		return str;
+	}
+
 	// Post Facebook status
-	function postFBStatus(message, friends, place) {
+	function postFBStatus(message, friends, place, myEvent) {
 		var parameters = {
 			"access_token": fb_authResponse.accessToken,
 			"message": message,
 			"tags": friends.join(),
-			"place": place,
 		};
+		if (place) {
+			parameters.place = place;
+		}
+		if (myEvent) {
+			storeEvent(myEvent);
+		}
 		$.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
-			alert("Post result: " + data);
+			alert("Posted!!");
 		});
 	}
 
-	function getLocation() {
+	// Get current location. Need callback
+	function getCurrentLocation(callback) {
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(function(position) {
-				return { "latitude": position.coords.latitude, "longitude": position.coords.longitude }
+				callback({ "latitude": position.coords.latitude, "longitude": position.coords.longitude });
 			});
-		} else {
-			return;
 		}
 	}
 
+	// Some place far away because we don't need this for demo
 	function getMyHomeLocation() {
-		return {};
+		return {"latitude": 0, "longitude": 0};
 	}
 
-	function showGeneratedMessage(message) {
+	// Prepare content, wait for user to post
+	function preparePostContent(message, friends, place, myEvent) {
+		prepared_message = message;
+		prepared_friends = friends;
+		prepared_place = place;
+		prepared_event = myEvent;
+
 		$("#message").html(message);
+		// $("#friends..")
 		$("#postButton").removeAttr("disabled");
 	}
 
-	function getAttendingEvent(r) {
-		return { "name": "hackathon", "location": "fb hq" };
+	// Return event attendees and my friends
+	function getAttendingEventAndFriends(response) {
+
+		// Prepare current date to be the same as response.event date format for comparison
+		var current_events=0,all_events=0;
+		var currentdate = new Date();
+		var datetime = currentdate.getFullYear() + "-"
+		+ pad(currentdate.getMonth()+1,2) + "-"
+		+ pad(currentdate.getDate(),2) + "T"
+		+ pad(currentdate.getHours(),2) + ":"
+		+ pad(currentdate.getMinutes(),2) + ":"
+		+ pad(currentdate.getSeconds(),2) + "-"
+		+ pad(currentdate.getTimezoneOffset()/60,2) + "00" ;
+
+		var results = {};
+
+		for (var i=0; i<response.events.data.length; i++) {
+      // If that event has both start & end time. Check whether current time is in the event's timeframe
+      if (response.events.data[i].end_time) {
+        // $('#events').append(response.events.data[i].end_time);
+        if (response.events.data[i].end_time > datetime && response.events.data[i].start_time < datetime) {
+					// :: Event result ::
+					results.event = response.events.data[i];
+					break;
+				}
+			}
+      // Otherwise, that event is all-day. Just check whether current date is the same as event's
+      else if (datetime.indexOf(response.events.data[i].start_time) != -1 ) {
+    		// Return this event as a result
+    		results.event = response.events.data[i];
+    		break;
+    	}
+    }
+
+    // Check if there's any attending event
+    if (results.event != undefined) {
+    	results.friends = [];
+      // Search for people attending this event that are my friends
+      var attendeesHash = {};
+      for (var j=0; j<results.event.attending.data.length; j++) {
+      	attendeesHash[results.event.attending.data[j].id] = true;
+      }
+      // Search for your friend and add him to the results
+      for (var j=0; j<response.friends.data.length; j++) {
+      	if (attendeesHash[response.friends.data[j].id] == true) {
+	        // :: Append friend to result ::
+	        results.friends.push(response.friends.data[j].id);
+	      }
+	    }
+	  }
+	  return results;
 	}
 
-	function isCloseTo(a, b) {
-		return true;
+	// Store "myEvent" into offline storage
+	function storeEvent(myEvent) {
+		eventHash=localStorage.getObj('eventHash');
+		if (eventHash==null) {
+			eventHash={};
+			eventHash[myEvent.id] = myEvent;
+		}
+		else {
+			eventHash[myEvent.id]=myEvent;
+		}
 	}
 
-	function searchStatusContainingPlaceName(n) {
-		return {};
+	// Search status mentioning about that place or event
+	function searchStatusContainingEvent(myEvent) {
+		eventHash=localStorage.getObj('eventHash');
+
+		if (eventHash!=null)  {
+			return eventHash[myEvent.id];
+		}
+
+		return null;
 	}
 
-	function isLessThan1HourAgo(s) {
-		return false;
+	// Check if that event is recent < 1hr
+	function isLessThan1HourAgo(myEvent) {
+
+		startTime=new Date(myEvent.start_time);
+		nowTime=new Date();
+		difference=(nowTime-startTime)
+		if (difference!=0)
+			difference=difference/1000;
+
+		if (difference<3600)
+			return true;
+		else
+			return false;
 	}
 
 	function isLessThan5HourAgo(s) {
@@ -98,81 +221,96 @@
 			return  "Almost done!.."
 	}
 
- 	function generateStatusMessage() {
+	function generateStatusMessage() {
 		// Get an object from FB.api about everything I need
-		FB.api('/me?fields=name', function(response) {
-			console.log(response.name);
+		FB.api('/me?fields=name,events.fields(name,venue,attending.fields(id),end_time,start_time),friends.fields(id,name)', 
+			function(response) {
+				console.log("Got response from Graph API! "+response.name);
+			// Also need to wait for location.
+			getCurrentLocation(function(currentLocation) {
+				// Got everything we need. Proceed!
+				console.log("Got location!");
 
-			// Is there a happenning event that I'm suppose to be attending now?
-			var myEvent = getAttendingEvent(response);
-			if (myEvent) {
-				// Yes. Am I close to that event's location?
-				if (isCloseTo(getLocation(), myEvent.location)) {
-					// Yes.  Have I posted a status about this event earlier?
-					var status = searchStatusContainingPlaceName(myEvent.name);
-					if (status) {
-						// Has he posted about it recently (1hr) ?
-						if (isLessThan1HourAgo(status)) {
-							// Get out of this logic
-							// ** do nothing and proceed to next logic **
+				// Is there a happenning event that I'm suppose to be attending now?
+				// Results will be { "event": {..}, "friends": [..] }
+				var eventAndFriends = getAttendingEventAndFriends(response);
+				if (eventAndFriends.event != undefined) {
+					var myEvent = eventAndFriends.event;
+					var friendsInEvent = eventAndFriends.friends;
+					// alert(myEvent.name + " and "+ friendsInEvent.join()); return;
+					// postFBStatus("Yo! "+results.event.name, results.friends, 166793820034304);
+					// return;
+
+					// Yes. Am I close to that event's location?
+					if (isCloseToEachOther(currentLocation, myEvent.venue)) {
+						alert("I'm close to "+myEvent.name); return;
+
+						// Yes. Have I posted a status about this event earlier?
+						var status = searchStatusContainingEvent(myEvent);
+						if (status) {
+							// Has he posted about it recently (1hr) ?
+							if (isLessThan1HourAgo(status)) {
+								// Get out of this logic
+								// ** do nothing and proceed to next logic **
+							} else {
+								// More than 1 hour ago. Post the event progress!
+								var timeSpentPercent = getEventTimeSpentPercent(myEvent);
+								showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
+								return;
+							}
 						} else {
-							// More than 1 hour ago. Post the event progress!
-							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-							showGeneratedMessage("I am still at "+myEvent.name+". "+getMessageTimeSpentPercent(timeSpentPercent));
+							// No status about the event yet. Post a status about this event!
+							showGeneratedMessage("I am at "+myEvent.name+"!");
 							return;
 						}
 					} else {
-						// No status about the event yet. Post a status about this event!
-						showGeneratedMessage("I am at "+myEvent.name+"!");
+						// I'm not close to that event. I must have missed it!
+						showGeneratedMessage("I missed "+myEvent.name+" T_T");
 						return;
 					}
-				} else {
-					// I'm not close to that event. I must have missed it!
-					showGeneratedMessage("I missed "+myEvent.name+" T_T");
-					return;
 				}
-			}
-			// No happening event.
-			// Or just posted about that event recently (< 1hr)
-			// Come to this logic!
-			if (isCloseTo(getLocation(), getMyHomeLocation())) {
-				// We're not gonna demo this use case. Skip it!
-				// ** do nothing **
-			} else {
-				// I'm not at home. Check the weather
-				var averageDegree = getNormalTemperatureNow(getLocation());
-				var currentDegree = getCurrentTemperatureNow(getLocation());
-				if (currentDegree - averageDegree > 10) {
-					// It's hotter than normal
-					showGeneratedMessage("OMG ..It's so hot in here!!");
-				} else if (currentDegree - averageDegree < -10) {
-					// It's cooler than normal
-					showGeneratedMessage("Crazy weather, I am freezing now!!");
+				// No happening event.
+				// Or just posted about that event recently (< 1hr)
+				// Come to this logic!
+				if (isCloseToEachOther(currentLocation, getMyHomeLocation())) {
+					// We're not gonna demo this use case. Skip it!
+					// ** do nothing **
 				} else {
-					// Temperature is normal. Am I close to any point of interest? Find one.
-					var pointOfInterest = getClosestPointOfInterest(getLocation());
-					if (pointOfInterest) {
-						// I'm closed to somewhere. So, have I posted about it recently?
-						var status = searchStatusContainingPlaceName(pointOfInterest.name);
-						if (isLessThan5HourAgo(status)) {
-							// No use case for this.
-							// ** do nothing **
-						} else {
-							// Check in here!
-							showGeneratedMessage("I'm here! "+pointOfInterest.name);
-						}
+					// I'm not at home. Check the weather
+					var averageDegree = getNormalTemperatureNow(getLocation());
+					var currentDegree = getCurrentTemperatureNow(getLocation());
+					if (currentDegree - averageDegree > 10) {
+						// It's hotter than normal
+						showGeneratedMessage("OMG ..It's so hot in here!!");
+					} else if (currentDegree - averageDegree < -10) {
+						// It's cooler than normal
+						showGeneratedMessage("Crazy weather, I am freezing now!!");
 					} else {
-						// We're not gonna demo this use case.
-						// ** do nothing **
+						// Temperature is normal. Am I close to any point of interest? Find one.
+						var pointOfInterest = getClosestPointOfInterest(getLocation());
+						if (pointOfInterest) {
+							// I'm closed to somewhere. So, have I posted about it recently?
+							var status = searchStatusContainingPointOfInterest(pointOfInterest.name);
+							if (isLessThan5HourAgo(status)) {
+								// No use case for this.
+								// ** do nothing **
+							} else {
+								// Check in here!
+								preparePostContent("I'm here! "+pointOfInterest.name);
+							}
+						}
 					}
 				}
-			}
+
+
+			}); // end callback of getCurrentLocation()
+
 		}); // end decision tree
 
 	}
 
 	function postButtonClick() {
-		postFBStatus($('#message').html(), [609025954,543721930], 132738745815);
+		postFBStatus(prepared_message, text, prepared_place, prepared_event);
 	}
 
 </script>
@@ -185,8 +323,8 @@
 
 	<p>
 		Generated status message:<br>
-		<div id="message" style="font-size:3em;background-color:#ccffaa"></div><br>
-		<button id="postButton" onClick="postButtonClick()" disabled>Post!</button>
+		<div id="message" style="font-size:3em;background-color:#ccffaa">test</div><br>
+		<button id="postButton" onClick="postButtonClick()">Post!</button>
 	</p>
 </body>
 </html>

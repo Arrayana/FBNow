@@ -214,6 +214,3 @@ function isLessThan5HourAgo(status){
           prettyDate.indexOf('just now') > -1 ;
 
 }
-
-
-
