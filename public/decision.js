@@ -7,22 +7,31 @@ var prepared_event = {};
 /* --- Mandatory functions from initfb.js --- */
 // Update UI to prompt user to login
 function promptLogin(request_message) {
-    $('#showButton').removeAttr('disabled');
-    $('#showButton').html(request_message);
-    $('#showButton').off('click'); // remove previous click handler
+  // $('#showButton').button('option','disabled',false);
+  $("#showButton").button( "enable" );
+  // alert($('#showButton'));
+  //   $('#showButton').removeAttr('disabled');
+  //   $('#showButton').data('disabled','false');
+  //   $('#showButton').attr('disabled', false).removeClass( 'ui-state-disabled' );
+    // $('#showButton').html(request_message);
+    // $("#showButton").button("option","text",request_message);
+    // $('#showButton').off('click'); // remove previous click handler
     $('#showButton').click(clickToLoginHandler);
 }
 
 // Update UI to say it's ready to go!
 function promptStart() {
-
-    // Sample call: Show name
-    FB.api('/me?fields=name', function (response) {
-        $('#showButton').html('Hello ' + response.name + '!');
-    });
-
     generateStatusMessage();
 }
+/* ------------ Click handlers --------------- */
+function clickToLoginHandler() {
+  $("#showButton").button( "disable" );
+    // $('#showButton').html('Waiting for user');
+    FB.login(function(response) {
+      // Check if user has really granted us
+      checkUser();
+    }, {scope: required_permissions});
+};
 /* --------------------------------------------*/
 
 // Post Facebook status
@@ -246,7 +255,7 @@ function generateStatusMessage() {
             // I'm closed to somewhere. So, have I posted about it recently?
             preparePostContent(
               "location",
-              "I'm here! " + pointOfInterest.name, // message
+              "I'm here at " + pointOfInterest.name, // message
               null, // friend
               pointOfInterest.id, // place
               null // event
