@@ -13,26 +13,33 @@ $(document).ready(function() {
 
 
 
-/*
-array=localStorage.getObj('arx')
-if (array!=null)
-{alert(array[0])
-alert(array[1])}
-if (array==null)
-array=[]
-var text=window.prompt("sometext","defaultvalue")
-array[0]=text
-array[1]="xxxxxx"
+  	$( "#swipeEvent" ).on( "swipe", swipeEventHandler );
+   
+    // Callback function references the event target and adds the 'swipe' class to it
+    function swipeEventHandler( event ){
+      postButtonClick("event");
+   
+    }
 
+    $( "#slideWeather" ).on( "swipe", swipeWeatherHandler );
+   
+    // Callback function references the event target and adds the 'swipe' class to it
+    function swipeWeatherHandler( event ){
+      postButtonClick('weather') 
+    }
 
-localStorage.setObj('arx',array);
-*/
-	$( "#message1" ).on( "swipe", swipeHandler );
- 
-  // Callback function references the event target and adds the 'swipe' class to it
-  function swipeHandler( event ){
-   alert("ssss")
-   postButtonClick("event");
- }
+     $( "#slideLocation" ).on( "swipe", swipeLocationHandler );
+   
+    // Callback function references the event target and adds the 'swipe' class to it
+    function swipeLocationHandler( event ){
+      postButtonClick('location') 
+    }
 
- })
+    $( "#slideQuote" ).on( "swipe", swipeQuoteHandler );
+   
+    // Callback function references the event target and adds the 'swipe' class to it
+    function swipeQuoteHandler( event ){
+      postButtonClick('quote') 
+    }
+
+})

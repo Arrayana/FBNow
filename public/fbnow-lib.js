@@ -137,6 +137,31 @@ function isLessThan1HourAgo(status) {
 
 }
 
+function getEventTimeSpentPercent(myEvent) {
+  startTime= new Date(myEvent.start_time);
+  endTime=new Date(myEvent.end_time);
+  completedTime =now-startTime;
+  totalTime =endTime-startTime;
+  return 90;
+  //return (completedTime/totalTime)*100;
+}
+
+function isEventLessThan1HourAgo(status) {
+  startTime= new Date(status.start_time);
+  now= new Date();
+
+  difference=now-startTime;
+  if (difference !=0)
+    difference=difference/1000;
+
+  if (difference<3600)
+    return true
+  else
+    return false
+
+
+}
+
 function isLessThan5HourAgo(status) {
   var prettyDate = timeAgo(status.updated_time);
   console.log(prettyDate);
@@ -238,8 +263,8 @@ function getAttendingEventAndFriends(response) {
     // Search for your friend and add him to the results
     for (var j = 0; j < response.friends.data.length; j++) {
       if (attendeesHash[response.friends.data[j].id] == true) {
-        // :: Append friend to result ::
-        results.friends.push(response.friends.data[j].id);
+        // :: Append friend object to result ::
+        results.friends.push(response.friends.data[j]);
       }
     }
   }
@@ -247,12 +272,15 @@ function getAttendingEventAndFriends(response) {
 }
 
 function getMessageTimeSpentPercent(timeSpentPercent) {
-  if (timeSpentPercent < 10)
+
+  if (timeSpentPercent <= 10)
     return "Feeling excited!!.. just started"
-  if (40 < timeSpentPercent && timeSpentPercent < 60)
+  if (40 <= timeSpentPercent && timeSpentPercent <= 60)
     return "Lets keep rolling..just half way done!!!"
-  if (90 < timeSpentPercent)
+  if (90 <= timeSpentPercent)
     return "Almost done!.."
+  return "meh"
+
 }
 
 // Store "myEvent" into offline storage
@@ -264,6 +292,8 @@ function storeEvent(myEvent) {
   } else {
     eventHash[myEvent.id] = myEvent;
   }
+
+  localStorage.setObj('eventHash',eventHash)
 }
 
 // Search status mentioning about that place or event
@@ -277,7 +307,25 @@ function searchStatusContainingEvent(myEvent) {
   return null;
 }
 
-/* ================= Random quote & news ==================== */
+function getRandomNews(callback) {
+  $.ajax({
+    url: "http://api.espn.com/v1/now/popular?apikey=tpnk43zgq4uqrpage6fjhsn8", //http://www.iheartquotes.com/api/v1/random.json",
+    dataType: "jsonp",
+    success: function (parsed_json) {
+      try {
+        var randomOrder = getRandomNumberBetween(0,10);
+        callback(parsed_json['feed'][randomOrder]['headline']);
+      } catch (err) {
+        console.log("Error getting news: "+err.message+"\nResponse: "+JSON.stringify(parsed_json));
+      }
+    }
+  });
+}
+
+function getRandomNumberBetween(min, max){
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 function getRandomQuote(callback) {
     $.ajax({
         url: 'http://api.forismatic.com/api/1.0/',
@@ -287,15 +335,5 @@ function getRandomQuote(callback) {
         format: 'json',
         jsonp: 'jsonp',
         success: function(parsed_json) { callback(parsed_json['quoteText']) }
-    });
-}
-
-function getRandomNews(callback) {
-  $.ajax({
-    url: "http://api.espn.com/v1/now/popular?apikey=tpnk43zgq4uqrpage6fjhsn8", //http://www.iheartquotes.com/api/v1/random.json",
-    dataType: "jsonp",
-    success: function (parsed_json) {
-      callback(parsed_json['feed'][0]['headline']);
-    }
-  });
+});
 }
