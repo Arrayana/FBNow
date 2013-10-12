@@ -1,10 +1,78 @@
 <html>
 <head><title>Decision tree</title>
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
-<script src="main.js"></script>
+<script src="initfb.js"></script>
 <script>
-	function postFBStatus(message) {
-		alert(message);
+	// Update UI to prompt user to login
+	function promptLogin(request_message) {
+		$('#showButton').removeAttr('disabled');
+		$('#showButton').html(request_message);
+		$('#showButton').off('click'); // remove previous click handler
+		$('#showButton').click(clickToLoginHandler);
+	}
+
+	// Update UI to say it's ready to go!
+	function promptStart() {
+		// Sample call: Show name
+		FB.api('/me?fields=name', function(response) {
+			$('#showButton').html('Hello '+response.name+'!');
+		});
+
+		generateStatusMessage();
+	}
+
+	function getLocation() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(function(position) {
+				return { "latitude": position.coords.latitude, "longitude": position.coords.longitude }
+			});
+		} else {
+			return;
+		}
+	}
+
+	function getMyHomeLocation() {
+		return {};
+	}
+
+	function showGeneratedMessage(message) {
+		$("#message").html(message);
+	}
+
+	function getAttendingEvent(r) {
+		return { "name": "hackathon", "location": "fb hq" };
+	}
+
+	function isCloseTo(a, b) {
+		return true;
+	}
+
+	function searchStatusContainingPlaceName(n) {
+		return {};
+	}
+
+	function isLessThan1HourAgo(s) {
+		return false;
+	}
+
+	function isLessThan5HourAgo(s) {
+		return false;
+	}
+
+	function getEventTimeSpentPercent(e) {
+		return 50;
+	}
+
+	function getNormalTemperatureNow(p) {
+		return 70;
+	}
+
+	function getCurrentTemperatureNow(p) {
+		return 65;
+	}
+
+	function getClosestPointOfInterest(p) {
+		return { "name": "Fuki Sushi" };
 	}
 
 	function generateStatusMessage() {
@@ -27,24 +95,24 @@
 						} else {
 							// More than 1 hour ago. Post the event progress!
 							var timeSpentPercent = getEventTimeSpentPercent(myEvent);
-							postFBStatus("I am still at "+myEvent.name+". "+timeSpentPercent+"%");
+							showGeneratedMessage("I am still at "+myEvent.name+". "+timeSpentPercent+"%");
 							return;
 						}
 					} else {
 						// No status about the event yet. Post a status about this event!
-						postFBStatus("I am at "+myEvent.name+"!");
+						showGeneratedMessage("I am at "+myEvent.name+"!");
 						return;
 					}
 				} else {
 					// I'm not close to that event. I must have missed it!
-					postFBStatus("I missed the event :"+myEvent.name);
+					showGeneratedMessage("I missed "+myEvent.name+" T_T");
 					return;
 				}
 			}
 			// No happening event.
 			// Or just posted about that event recently (< 1hr)
 			// Come to this logic!
-			if (isCloseToHome(getLocation(), myHomeLocation)) {
+			if (isCloseTo(getLocation(), getMyHomeLocation())) {
 				// We're not gonna demo this use case. Skip it!
 				// ** do nothing **
 			} else {
@@ -53,10 +121,10 @@
 				var currentDegree = getCurrentTemperatureNow(getLocation());
 				if (currentDegree - averageDegree > 10) {
 					// It's hotter than normal
-					postFBStatus("It's so hot!!");
+					showGeneratedMessage("It's so hot!!");
 				} else if (currentDegree - averageDegree < -10) {
 					// It's cooler than normal
-					postFBStatus("It's so cold!!");
+					showGeneratedMessage("It's so cold!!");
 				} else {
 					// Temperature is normal. Am I close to any point of interest? Find one.
 					var pointOfInterest = getClosestPointOfInterest(getLocation());
@@ -68,7 +136,7 @@
 							// ** do nothing **
 						} else {
 							// Check in here!
-							postFBStatus("I'm here! "+pointOfInterest.name);
+							showGeneratedMessage("I'm here! "+pointOfInterest.name);
 						}
 					} else {
 						// We're not gonna demo this use case.
@@ -84,5 +152,13 @@
 </head>
 <body>
 	<div id="fb-root"></div>
+
+	<button id="showButton" disabled>Checking Facebook login...</button>
+	<span id="fbName"></span>
+
+	<p>
+		Generated status message:<br>
+		<div id="message" style="font-size:3em;background-color:#ccffaa"></div>
+	</p>
 </body>
 </html>
