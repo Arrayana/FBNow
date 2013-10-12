@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>FB Now!</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.1/jquery.mobile-1.2.1.min.css" />
     <link rel="stylesheet" href="styles.css" />
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
@@ -11,68 +11,68 @@
     <script src="initfb.js"></script>
     <script src="fbnow-lib.js"></script>
     <script src="decision.js"></script>
-  </head>
-  <body>
+</head>
+<body>
 
-    <div id="fb-root"></div>
+<div id="fb-root"></div>
 
-    <div data-role="page">
-      <div data-role="header">
+<div data-role="page">
+    <div data-role="header">
         <img  height="168" width="317" src="http://loveletters2strangers.com/wp-content/uploads/2013/02/facebook-logo.png"  />
         <span class="now">NOW!</span>
-      </div><!-- /header -->
-      <div data-role="content"> 
-          <ul data-role="listview">
+    </div><!-- /header -->
+    <div data-role="content">
+        <ul data-role="listview">
             <li  id="slideEvent"  data-icon="false" ><a onclick="postButtonClick('event')" id="messageEvent" class="multiline" href="#">Generating..</a></li>
             <li id="slideWeather" data-icon="false"><a onclick="postButtonClick('weather')" id="messageWeather" class="multiline" href="#">Generating..</a></li>
             <li id="slideLocation" data-icon="false"><a onclick="postButtonClick('location')" id="messageLocation" class="multiline" href="#">Generating..</a></li>
             <li id="slideQuote" data-icon="false"><a onclick="postButtonClick('quote')" id="messageQuote" class="multiline" href="#">Generating..</a></li>
-          </ul>
-      </div><!-- /content -->
+        </ul>
+    </div><!-- /content -->
 
-      <!-- TEST
-        <table width="100%">
-          <tr>
-            <td colspan="2" style="text-align:center">
-              <h1>Hi <span id="fbName"></span>. Click this damn button to start!</h1>
-              <button id="showButton" style="width:50%" disabled>Loading...</button>
-            </td>
-          </tr>
-          <tr>
-            <td width="50%" style="vertical-align:top"><div id="redBox" style="width:100%;background-color:#ffcccc"></div></td>
-            <td width="50%" style="vertical-align:top"><div id="yellowBox" style="width:100%;background-color:#ffffcc"></div></td>
-          </tr>
-        </table>
+    <!-- TEST
+      <table width="100%">
+        <tr>
+          <td colspan="2" style="text-align:center">
+            <h1>Hi <span id="fbName"></span>. Click this damn button to start!</h1>
+            <button id="showButton" style="width:50%" disabled>Loading...</button>
+          </td>
+        </tr>
+        <tr>
+          <td width="50%" style="vertical-align:top"><div id="redBox" style="width:100%;background-color:#ffcccc"></div></td>
+          <td width="50%" style="vertical-align:top"><div id="yellowBox" style="width:100%;background-color:#ffffcc"></div></td>
+        </tr>
+      </table>
 
-        <div id="results" align="center">
+      <div id="results" align="center">
+        Results will appear here.
+          </div>
+      <div id="quote" align="center">
           Results will appear here.
-            </div>
-        <div id="quote" align="center">
-            Results will appear here.
-            <button onclick="getRandomQuote()">Get my quote</button>
+          <button onclick="getRandomQuote()">Get my quote</button>
 
-        </div>
-        <div id="weather" align="center">
-            Results will appear here.
-            <button onclick="getWeather()">Get my weather</button>
+      </div>
+      <div id="weather" align="center">
+          Results will appear here.
+          <button onclick="getWeather()">Get my weather</button>
 
-        </div>
-        <div id="demo" align="center">
-            Results will appear here.
-            <button onclick="getLocation()">Try it</button>
+      </div>
+      <div id="demo" align="center">
+          Results will appear here.
+          <button onclick="getLocation()">Try it</button>
 
-        </div>
-        <div id="events" align="center">
-              Ideally you see events list here.
-              <button onclick="FBFetch()">Try it</button>
-        </div>
-      TEST -->
+      </div>
+      <div id="events" align="center">
+            Ideally you see events list here.
+            <button onclick="FBFetch()">Try it</button>
+      </div>
+    TEST -->
 
-      <!-- <div data-role="footer" class="ui-bar"> -->
+    <!-- <div data-role="footer" class="ui-bar"> -->
 
-      <!-- </div> -->
+    <!-- </div> -->
 
-    </div><!-- /page -->
+</div><!-- /page -->
 
-  </body>
+</body>
 </html>
