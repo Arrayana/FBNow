@@ -40,7 +40,7 @@ function postFBStatus(message, friends, place, myEvent) {
   		friendsIDList.push(friends[i].id);
   	}
     parameters.tags = friendsIDList.join();
-    alert("Also tag these guys: "+friendsIDList.join());
+    //alert("Also tag these guys: "+friendsIDList.join());
   }
   // Tag place if place is provided
   if (place) {
@@ -52,8 +52,12 @@ function postFBStatus(message, friends, place, myEvent) {
   }
 
   //alert(message)
+
   // POST MESSAGE! (Currently disabled because of the ban T_T)
+  $("#feedback").html('Posting...')
   $.post( "https://graph.facebook.com/me/feed", parameters).done(function( data ) {
+    $("#feedback").html("Your new status was successfully posted")
+    setTimeout(function(){ $("#feedback").html('')},3000)
   //alert("Posted!!");
   });
 }
@@ -181,45 +185,30 @@ function generateStatusMessage() {
         /*** Weather ***/
 
         getTemperatureDiff(currentLocation, function (temperatureDiff) {
-            // Random between temperature & quote
-            if(getRandomNumberBetween(0,1) == 1){
-                // Get quote
-                getRandomQuote(function(result) {
-                    preparePostContent("weather",
-                        result,
-                        [], // friend
-                        null, // place
-                        null // event
-                    );
-                });
-            }
-            else{
-                // Get weather
-              if (temperatureDiff > 10) {
-                // It's hotter than normal
-                preparePostContent("weather",
-                  "OMG ..It's so hot in here!!",
-                  [], // friend
-                  null, // place
-                  null // event
-                );
+          if (temperatureDiff > 10) {
+            // It's hotter than normal
+            preparePostContent("weather",
+              "OMG ..It's so hot in here!!", 
+              [], // friend
+              null, // place
+              null // event
+            );
 
-              } else if (temperatureDiff < -10) {
-                // It's cooler than normal
-                preparePostContent("weather",
-                  "Crazy weather, I'm freezing now!",
-                  [], // friend
-                  null, // place
-                  null // event
-                );
-              } else {
-                preparePostContent("weather", "Boring weather.. same old!!",
-                    [], // friend
-                  null, // place
-                  null // event
-                );
-              }
-            }
+          } else if (temperatureDiff < -10) {
+            // It's cooler than normal
+            preparePostContent("weather",
+              "Crazy weather, I'm freezing now!", 
+              [], // friend
+              null, // place
+              null // event
+            );
+          } else {
+            preparePostContent("weather", "bahhh boring weather.. same old!!", 
+            	[], // friend
+              null, // place
+              null // event
+            );
+          }
         });
 
         /*** Point of interest ***/
@@ -231,7 +220,7 @@ function generateStatusMessage() {
               "location",
               "I'm here! " + pointOfInterest.name, // message
               [], // friend
-              pointOfInterest.id, // place
+              null, // place
               null // event
             );
 
@@ -263,7 +252,9 @@ function generateStatusMessage() {
       }); // end callback of getCurrentLocation()
 
     }); // end decision tree
-$.mobile.hidePageLoadingMsg();
+
+  
+
 }
 
 // Event handler for POST Button

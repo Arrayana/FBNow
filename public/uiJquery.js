@@ -10,7 +10,7 @@
 
 	
 $(document).ready(function() {
-
+  //$("#feedback").toggle();
 
   $.mobile.showPageLoadingMsg();
 
