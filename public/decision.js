@@ -303,7 +303,7 @@
 				} else {
 				// No happening event.
 						preparePostContent("event",
-							"Nothing interesting in my life"+" T_T", // message
+							"Looking for events or passtimes. Any ideas?", // message
 							[], // no friend
 							null, // no place
 							null // no event
@@ -321,7 +321,7 @@
 					var averageDegree = getNormalTemperatureNow(currentLocation);
 					var currentDegree = getCurrentTemperatureNow(currentLocation);
 
-					if (currentDegree - averageDegree > 10) {
+					if (currentDegree - averageDegree > 2) {
 						// It's hotter than normal
 						preparePostContent("weather",
 							"OMG ..It's so hot in here!!", 
@@ -330,7 +330,7 @@
 							null // no event
 							);
 				
-					} else if (currentDegree - averageDegree < -10) {
+					} else if (currentDegree - averageDegree < -2) {
 						// It's cooler than normal
 						preparePostContent("weather",
 							"Crazy weather, I'm freezing now!", 
